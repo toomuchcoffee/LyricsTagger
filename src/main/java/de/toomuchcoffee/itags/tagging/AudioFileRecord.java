@@ -1,4 +1,4 @@
-package tagging;
+package de.toomuchcoffee.itags.tagging;
 
 import java.io.File;
 

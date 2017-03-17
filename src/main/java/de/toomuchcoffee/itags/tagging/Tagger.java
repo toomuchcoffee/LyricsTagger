@@ -1,4 +1,4 @@
-package tagging;
+package de.toomuchcoffee.itags.tagging;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;

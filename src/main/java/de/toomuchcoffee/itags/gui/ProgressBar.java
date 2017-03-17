@@ -1,4 +1,4 @@
-package gui;
+package de.toomuchcoffee.itags.gui;
 
 import javax.swing.*;
 

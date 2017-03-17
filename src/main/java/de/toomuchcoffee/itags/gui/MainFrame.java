@@ -1,4 +1,4 @@
-package gui;
+package de.toomuchcoffee.itags.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -11,12 +11,12 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import lyrics.LyricsWikiaFinder;
+import de.toomuchcoffee.itags.lyrics.LyricsWikiaFinder;
 import org.apache.commons.io.FileUtils;
 import org.jaudiotagger.tag.FieldKey;
 
-import tagging.AudioFileRecord;
-import tagging.Tagger;
+import de.toomuchcoffee.itags.tagging.AudioFileRecord;
+import de.toomuchcoffee.itags.tagging.Tagger;
 
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -81,7 +81,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new MainFrame("Batched Lyrics Finder");
+        JFrame frame = new MainFrame("iTags: add lyrics to your music library");
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
@@ -183,25 +183,21 @@ public class MainFrame extends JFrame implements ActionListener {
                 for (AudioFileRecord aRecord : tagger.getRecords()) {
                     if (!running)
                         break;
-                    try {
-                        String lyrics = LyricsWikiaFinder.findLyrics(
+                    String lyrics = LyricsWikiaFinder.findLyrics(
                                 aRecord.getArtist(), aRecord.getTitle());
-                        if (lyrics != null) {
-                            aRecord.setLyrics(lyrics);
-                            aRecord.setStatus("LYRICS FOUND");
-                        } else {
-                            aRecord.setStatus("NO LYRICS FOUND");
-                        }
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                table.repaint();
-                                table.revalidate();
-                            }
-                        });
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if (lyrics != null) {
+                        aRecord.setLyrics(lyrics);
+                        aRecord.setStatus("LYRICS FOUND");
+                    } else {
+                        aRecord.setStatus("NO LYRICS FOUND");
                     }
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            table.repaint();
+                            table.revalidate();
+                        }
+                                              });
+
                     progress.setValue(progress.getValue() + 1);
                 }
 

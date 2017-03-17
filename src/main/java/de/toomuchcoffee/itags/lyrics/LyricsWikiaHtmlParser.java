@@ -1,4 +1,4 @@
-package lyrics;
+package de.toomuchcoffee.itags.lyrics;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;

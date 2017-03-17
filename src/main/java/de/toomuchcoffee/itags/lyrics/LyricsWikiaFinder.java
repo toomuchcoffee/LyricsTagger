@@ -1,14 +1,12 @@
-package lyrics;
+package de.toomuchcoffee.itags.lyrics;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.swing.text.html.parser.ParserDelegator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,23 +19,28 @@ public class LyricsWikiaFinder {
 
     public static final String NOT_LICENSED = "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.";
 
-    public static String findLyrics(String artist, String song) throws ParserConfigurationException, SAXException, IOException, URISyntaxException {
-        String urlString = buildUrl(artist, song);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(urlString);
-		doc.getDocumentElement().normalize();
-		Element lyricsElem = (Element) doc.getElementsByTagName("lyrics").item(0);
-		String lyricsAbstract = lyricsElem.getTextContent();
-		if (lyricsAbstract==null || lyricsAbstract.trim().length()==0 ||
-                "not found".equalsIgnoreCase(lyricsAbstract)) {
+    public static String findLyrics(String artist, String song) {
+        try {
+            String urlString = buildUrl(artist, song);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(urlString);
+            doc.getDocumentElement().normalize();
+            Element lyricsElem = (Element) doc.getElementsByTagName("lyrics").item(0);
+            String lyricsAbstract = lyricsElem.getTextContent();
+            if (lyricsAbstract == null || lyricsAbstract.trim().length() == 0 ||
+                    "not found".equalsIgnoreCase(lyricsAbstract)) {
+                return null;
+            } else if ("instrumental".equalsIgnoreCase(lyricsAbstract)) {
+                return "Instrumental";
+            } else {
+                Element urlElem = (Element) doc.getElementsByTagName("url").item(0);
+                String lyricsUrlString = urlElem.getTextContent();
+                return parseHtml(lyricsUrlString);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
-        } else if ("instrumental".equalsIgnoreCase(lyricsAbstract)) {
-            return "Instrumental";
-        } else {
-            Element urlElem = (Element) doc.getElementsByTagName("url").item(0);
-            String lyricsUrlString = urlElem.getTextContent();
-            return parseHtml(lyricsUrlString);
         }
 	}
 
