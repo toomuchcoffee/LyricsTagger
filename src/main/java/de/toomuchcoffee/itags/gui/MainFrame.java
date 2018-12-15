@@ -1,22 +1,21 @@
 package de.toomuchcoffee.itags.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import de.toomuchcoffee.itags.lyrics.LyricsWikiaFinder;
+import de.toomuchcoffee.itags.tagging.AudioFileRecord;
+import de.toomuchcoffee.itags.tagging.Tagger;
+import org.jaudiotagger.tag.FieldKey;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-
-import de.toomuchcoffee.itags.lyrics.LyricsWikiaFinder;
-import org.apache.commons.io.FileUtils;
-import org.jaudiotagger.tag.FieldKey;
-
-import de.toomuchcoffee.itags.tagging.AudioFileRecord;
-import de.toomuchcoffee.itags.tagging.Tagger;
+import static javax.swing.SwingUtilities.invokeLater;
+import static org.apache.commons.io.FileUtils.listFiles;
 
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -92,41 +91,33 @@ public class MainFrame extends JFrame implements ActionListener {
         if (baseDir != null && baseDir.exists() && baseDir.isDirectory()) {
             tagger = new Tagger();
 
-            new Thread(new Runnable() {
-                public void run() {
-                    running = true;
+            new Thread(() -> {
+                running = true;
 
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            button.setEnabled(false);
-                        }
+                invokeLater(() -> button.setEnabled(false));
+
+                progress.setShowValues(false);
+                progress.setIndeterminate(true);
+
+                Collection<File> allFiles = listFiles(baseDir, null, true);
+
+                progress.setMaximum(allFiles.size());
+                progress.setValue(0);
+                progress.setShowValues(true);
+                progress.setIndeterminate(false);
+
+                for (File aFile : allFiles) {
+                    if (!running)
+                        break;
+                    tagger.readFile(aFile);
+                    invokeLater(() -> {
+                        table.repaint();
+                        table.revalidate();
                     });
-
-                    progress.setShowValues(false);
-                    progress.setIndeterminate(true);
-
-                    Collection<File> allFiles = FileUtils.listFiles(baseDir, null, true);
-
-                    progress.setMaximum(allFiles.size());
-                    progress.setValue(0);
-                    progress.setShowValues(true);
-                    progress.setIndeterminate(false);
-
-                    for (File aFile : allFiles) {
-                        if (!running)
-                            break;
-                        tagger.readFile(aFile);
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                table.repaint();
-                                table.revalidate();
-                            }
-                        });
-                        progress.setValue(progress.getValue() + 1);
-                    }
-
-                    changeButton(false);
+                    progress.setValue(progress.getValue() + 1);
                 }
+
+                changeButton(false);
             }).start();
 
             table.setModel(new DefaultTableModel() {
@@ -165,121 +156,95 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void findLyrics() {
-        new Thread(new Runnable() {
-            public void run() {
-                running = true;
+        new Thread(() -> {
+            running = true;
 
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        button.setEnabled(false);
-                    }
+            invokeLater(() -> button.setEnabled(false));
+
+            progress.setMaximum(tagger.getRecords().size());
+            progress.setValue(0);
+            progress.setShowValues(true);
+            progress.setIndeterminate(false);
+
+            for (AudioFileRecord aRecord : tagger.getRecords()) {
+                if (!running)
+                    break;
+                String lyrics = LyricsWikiaFinder.findLyrics(aRecord.getArtist(), aRecord.getTitle());
+                if (lyrics != null) {
+                    aRecord.setLyrics(lyrics);
+                    aRecord.setStatus("LYRICS FOUND");
+                } else {
+                    aRecord.setStatus("NO LYRICS FOUND");
+                }
+                invokeLater(() -> {
+                    table.repaint();
+                    table.revalidate();
                 });
 
-                progress.setMaximum(tagger.getRecords().size());
-                progress.setValue(0);
-                progress.setShowValues(true);
-                progress.setIndeterminate(false);
-
-                for (AudioFileRecord aRecord : tagger.getRecords()) {
-                    if (!running)
-                        break;
-                    String lyrics = LyricsWikiaFinder.findLyrics(
-                                aRecord.getArtist(), aRecord.getTitle());
-                    if (lyrics != null) {
-                        aRecord.setLyrics(lyrics);
-                        aRecord.setStatus("LYRICS FOUND");
-                    } else {
-                        aRecord.setStatus("NO LYRICS FOUND");
-                    }
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            table.repaint();
-                            table.revalidate();
-                        }
-                                              });
-
-                    progress.setValue(progress.getValue() + 1);
-                }
-
-                if (running)
-                    changeButton(false);
+                progress.setValue(progress.getValue() + 1);
             }
+
+            if (running)
+                changeButton(false);
         }).start();
     }
 
     private void writeLyrics() {
-        new Thread(new Runnable() {
-            public void run() {
-                running = true;
+        new Thread(() -> {
+            running = true;
 
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        button.setEnabled(false);
+            invokeLater(() -> button.setEnabled(false));
+
+            progress.setMaximum(tagger.getRecords().size());
+            progress.setValue(0);
+            progress.setShowValues(true);
+            progress.setIndeterminate(false);
+
+            for (AudioFileRecord aRecord : tagger.getRecords()) {
+                if (!running)
+                    break;
+                try {
+                    if (aRecord.getLyrics() != null) {
+                        tagger.writeToFile(aRecord.getFile(), FieldKey.LYRICS, aRecord.getLyrics());
+                        aRecord.setStatus("LYRICS WRITTEN");
+                        invokeLater(new Runnable() {
+                            public void run() {
+                                table.repaint();
+                                table.revalidate();
+                            }
+                        });
                     }
-                });
-
-                progress.setMaximum(tagger.getRecords().size());
-                progress.setValue(0);
-                progress.setShowValues(true);
-                progress.setIndeterminate(false);
-
-                for (AudioFileRecord aRecord : tagger.getRecords()) {
-                    if (!running)
-                        break;
-                    try {
-                        if (aRecord.getLyrics() != null) {
-                            tagger.writeToFile(
-                                    aRecord.getFile(), FieldKey.LYRICS, aRecord.getLyrics());
-                            aRecord.setStatus("LYRICS WRITTEN");
-                            SwingUtilities.invokeLater(new Runnable() {
-                                public void run() {
-                                    table.repaint();
-                                    table.revalidate();
-                                }
-                            });
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    progress.setValue(progress.getValue() + 1);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                if (running)
-                    changeButton(false);
+                progress.setValue(progress.getValue() + 1);
             }
+            if (running)
+                changeButton(false);
         }).start();
     }
 
     private void changeButton(boolean reset) {
         if (reset) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    button.setActionCommand(ACTION_COMMAND_FIND_FILES);
-                    button.setText("Add music library path");
-                    button.setEnabled(true);
-                }
+            invokeLater(() -> {
+                button.setActionCommand(ACTION_COMMAND_FIND_FILES);
+                button.setText("Add music library path");
+                button.setEnabled(true);
             });
         } else if (ACTION_COMMAND_FIND_FILES.equals(button.getActionCommand())) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    button.setActionCommand(ACTION_COMMAND_FIND_LYRICS);
-                    button.setText("Find lyrics");
-                    button.setEnabled(true);
-                }
+            invokeLater(() -> {
+                button.setActionCommand(ACTION_COMMAND_FIND_LYRICS);
+                button.setText("Find lyrics");
+                button.setEnabled(true);
             });
         } else if (ACTION_COMMAND_FIND_LYRICS.equals(button.getActionCommand())) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    button.setActionCommand(ACTION_COMMAND_WRITE_LYRICS);
-                    button.setText("Write lyrics");
-                    button.setEnabled(true);
-                }
+            invokeLater(() -> {
+                button.setActionCommand(ACTION_COMMAND_WRITE_LYRICS);
+                button.setText("Write lyrics");
+                button.setEnabled(true);
             });
         } else if (ACTION_COMMAND_WRITE_LYRICS.equals(button.getActionCommand())) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    button.setEnabled(false);
-                }
-            });
+            invokeLater(() -> button.setEnabled(false));
         }
     }
 

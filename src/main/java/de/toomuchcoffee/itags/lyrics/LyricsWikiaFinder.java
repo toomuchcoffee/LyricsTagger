@@ -42,7 +42,7 @@ public class LyricsWikiaFinder {
             e.printStackTrace();
             return null;
         }
-	}
+    }
 
     private static String buildUrl(String artist, String song) throws URISyntaxException {
         URIBuilder b = new URIBuilder("http://lyrics.wikia.com/api.php");
@@ -54,18 +54,18 @@ public class LyricsWikiaFinder {
     }
 
     private static String parseHtml(String urlString) throws IOException {
-		URL url = new URL(urlString);
-		LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
-		InputStreamReader stream = new InputStreamReader(url.openStream());
-		Reader reader = new BufferedReader(stream);
-		new ParserDelegator().parse(reader, htmlParser, true/*ignore charset*/);
-		String lyrics = htmlParser.getText();
-		
-		if (lyrics!=null && lyrics.contains(NOT_LICENSED)) {
+        URL url = new URL(urlString);
+        LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
+        InputStreamReader stream = new InputStreamReader(url.openStream());
+        Reader reader = new BufferedReader(stream);
+        new ParserDelegator().parse(reader, htmlParser, true/*ignore charset*/);
+        String lyrics = htmlParser.getText();
+
+        if (lyrics != null && lyrics.contains(NOT_LICENSED)) {
             return null;
         } else {
             return lyrics;
         }
-	}
+    }
 
 }
