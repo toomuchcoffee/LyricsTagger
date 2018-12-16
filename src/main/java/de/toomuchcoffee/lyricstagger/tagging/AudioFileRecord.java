@@ -15,5 +15,9 @@ public class AudioFileRecord {
     private final String album;
     private final String title;
     private String lyrics;
-    private String status;
+    private Status status = Status.INITIAL;
+
+    public enum Status {
+        INITIAL, LYRICS_NOT_FOUND, LYRICS_FOUND, LYRICS_WRITTEN
+    }
 }
