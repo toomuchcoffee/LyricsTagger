@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import static java.awt.BorderLayout.*;
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.SwingUtilities.invokeLater;
@@ -36,7 +37,7 @@ public class Main extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         JPanel northPanel = new JPanel();
-        panel.add(northPanel, BorderLayout.NORTH);
+        panel.add(northPanel, NORTH);
 
         northPanel.add(actionPanel);
 
@@ -45,11 +46,11 @@ public class Main extends JFrame {
         progress.setIndeterminate(false);
         southPanel.add(progress);
 
-        panel.add(southPanel, BorderLayout.SOUTH);
+        panel.add(southPanel, SOUTH);
 
         table = new Table(this);
 
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(new JScrollPane(table), CENTER);
 
         getContentPane().add(panel);
     }

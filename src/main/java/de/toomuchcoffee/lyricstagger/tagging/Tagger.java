@@ -25,7 +25,7 @@ public class Tagger {
         } catch (CannotReadException e) {
             log.warn("file is not an audio file: {}", file.getAbsolutePath(), e);
         } catch (Exception e) {
-            log.error("failed to read file: {}" + file.getAbsolutePath(), e);
+            log.error("failed to read file: {}", file.getAbsolutePath(), e);
         }
         return Optional.empty();
     }
@@ -37,7 +37,7 @@ public class Tagger {
             tag.setField(key, value);
             f.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to write to file: {}", file.getAbsolutePath(), e);
         }
     }
 

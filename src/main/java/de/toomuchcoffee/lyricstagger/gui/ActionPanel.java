@@ -1,22 +1,23 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
+import com.google.common.collect.ImmutableMap;
 import de.toomuchcoffee.lyricstagger.lyrics.LyricsWikiaFinder;
 import de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord;
 import de.toomuchcoffee.lyricstagger.tagging.Tagger;
-import org.jaudiotagger.tag.FieldKey;
 
 import javax.swing.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
+import static de.toomuchcoffee.lyricstagger.gui.Step.*;
 import static de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord.Status.*;
 import static java.util.stream.Collectors.toList;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
+import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.apache.commons.io.FileUtils.listFiles;
+import static org.jaudiotagger.tag.FieldKey.LYRICS;
 
 class ActionPanel extends JPanel {
     private Main main;
@@ -25,56 +26,43 @@ class ActionPanel extends JPanel {
 
     private Step step = Step.START;
 
-    private JButton button1 = new JButton("Add music library path");
-    private JButton button2 = new JButton("Find lyrics");
-    private JButton button3 = new JButton("Write lyrics");
+    private Map<Step, JButton> buttons = ImmutableMap.of(
+            READ_FILES, new JButton("Add music library path"),
+            FIND_LYRICS, new JButton("Find lyrics"),
+            WRITE_LYRICS, new JButton("Write lyrics"));
 
     ActionPanel(Main main) {
         super();
         this.main = main;
-        add(button1);
-        add(button2);
-        add(button3);
+        buttons.values().forEach(this::add);
         next();
 
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
 
-        button1.addActionListener(e -> findAudioFiles());
-        button2.addActionListener(e -> findLyrics());
-        button3.addActionListener(e -> writeLyrics());
+        buttons.get(READ_FILES).addActionListener(e -> findAudioFiles());
+        buttons.get(FIND_LYRICS).addActionListener(e -> findLyrics());
+        buttons.get(WRITE_LYRICS).addActionListener(e -> writeLyrics());
     }
 
     void next() {
         disableAll();
         step = step.next();
-        switch (step) {
-            case FIND_LYRICS:
-                invokeLater(() -> button2.setEnabled(true));
-                break;
-            case WRITE_LYRICS:
-                invokeLater(() -> button3.setEnabled(true));
-                break;
-            case READ_FILES:
-            default:
-                invokeLater(() -> button1.setEnabled(true));
-        }
+        invokeLater(() -> buttons.get(step).setEnabled(true));
     }
 
     void disableAll() {
         invokeLater(() -> {
-            button1.setEnabled(false);
-            button2.setEnabled(false);
-            button3.setEnabled(false);
+            buttons.values().forEach(b -> b.setEnabled(false));
         });
     }
 
     private void findAudioFiles() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
 
         int returnVal = fileChooser.showOpenDialog(main);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
+        if (returnVal == APPROVE_OPTION) {
             main.setRecords(new ArrayList<>());
             File baseDir = fileChooser.getSelectedFile();
 
@@ -114,7 +102,7 @@ class ActionPanel extends JPanel {
                 .collect(toList());
 
         Function<AudioFileRecord, Boolean> writeLyrics = record -> {
-            tagger.writeToFile(record.getFile(), FieldKey.LYRICS, record.getLyrics());
+            tagger.writeToFile(record.getFile(), LYRICS, record.getLyrics());
             record.setStatus(LYRICS_WRITTEN);
             return true;
         };
