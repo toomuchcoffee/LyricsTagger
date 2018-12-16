@@ -8,29 +8,26 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class Tagger {
 
-    private List<AudioFileRecord> records = new ArrayList<AudioFileRecord>();
-
-    public void readFile(File file) {
+    public Optional<AudioFileRecord> readFile(File file) {
         try {
             AudioFile f = AudioFileIO.read(file);
             Tag tag = f.getTag();
 
             String lyrics = tag.getFirst(FieldKey.LYRICS);
             if (lyrics == null || lyrics.trim().length() == 0 || lyrics.trim().equalsIgnoreCase("not found")) {
-                records.add(new AudioFileRecord(
-                        file, tag.getFirst(FieldKey.ARTIST), tag.getFirst(FieldKey.ALBUM), tag.getFirst(FieldKey.TITLE)));
+                return Optional.of(new AudioFileRecord(file, tag.getFirst(FieldKey.ARTIST), tag.getFirst(FieldKey.ALBUM), tag.getFirst(FieldKey.TITLE)));
             }
         } catch (CannotReadException e) {
-            log.warn("file is not an audio file: " + file.getAbsolutePath());
+            log.warn("file is not an audio file: {}", file.getAbsolutePath(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("failed to read file: {}" + file.getAbsolutePath(), e);
         }
+        return Optional.empty();
     }
 
     public void writeToFile(File file, FieldKey key, String value) {
@@ -42,10 +39,6 @@ public class Tagger {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public List<AudioFileRecord> getRecords() {
-        return records;
     }
 
 }

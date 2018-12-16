@@ -3,32 +3,30 @@ package de.toomuchcoffee.itags.gui;
 import de.toomuchcoffee.itags.lyrics.LyricsWikiaFinder;
 import de.toomuchcoffee.itags.tagging.AudioFileRecord;
 import de.toomuchcoffee.itags.tagging.Tagger;
+import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.tag.FieldKey;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.apache.commons.io.FileUtils.listFiles;
 
 
-public class MainFrame extends JFrame implements ActionListener {
-    private static final String ACTION_COMMAND_FIND_FILES = "findFiles";
-    private static final String ACTION_COMMAND_FIND_LYRICS = "findLyrics";
-    private static final String ACTION_COMMAND_WRITE_LYRICS = "writeLyrics";
-    private static final String ACTION_COMMAND_CANCEL = "cancel";
-
+@Slf4j
+public class MainFrame extends JFrame {
     private JFileChooser fileChooser;
 
     private JButton button1 = new JButton("Add music library path");
-    private JButton button2 = new JButton("Add music library path");
-    private JButton button3 = new JButton("Add music library path");
+    private JButton button2 = new JButton("Find lyrics");
+    private JButton button3 = new JButton("Write lyrics");
 
     private JTable table;
 
@@ -40,7 +38,9 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private boolean running;
 
-    public MainFrame(String title) {
+    private List<AudioFileRecord> records = new ArrayList<>();
+
+    private MainFrame(String title) {
         super(title);
 
         JPanel p = new JPanel(new BorderLayout());
@@ -51,9 +51,15 @@ public class MainFrame extends JFrame implements ActionListener {
         JPanel btnsNorth = new JPanel();
         p.add(btnsNorth, BorderLayout.NORTH);
 
-        button1.addActionListener(this);
-        button2.addActionListener(this);
-        button3.addActionListener(this);
+        button1.addActionListener(e -> {
+            int returnVal = fileChooser.showOpenDialog(MainFrame.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                baseDir = fileChooser.getSelectedFile();
+                findAudioFiles();
+            }
+        });
+        button2.addActionListener(e -> findLyrics());
+        button3.addActionListener(e -> writeLyrics());
         btnsNorth.add(button1);
         btnsNorth.add(button2);
         btnsNorth.add(button3);
@@ -68,14 +74,16 @@ public class MainFrame extends JFrame implements ActionListener {
         p.add(btnsSouth, BorderLayout.SOUTH);
 
         JButton cancelBtn = new JButton("Cancel");
-        cancelBtn.addActionListener(this);
-        cancelBtn.setActionCommand(ACTION_COMMAND_CANCEL);
+        cancelBtn.addActionListener(e -> {
+            running = false;
+            switchButtons(Step.READ_FILES);
+        });
         btnsSouth.add(cancelBtn);
 
         table = new JTable() {
             public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
                 Component c = super.prepareRenderer(renderer, row, col);
-                AudioFileRecord record = tagger.getRecords().get(row);
+                AudioFileRecord record = records.get(row);
                 if (record.getLyrics() != null && c instanceof JComponent) {
                     JComponent jc = (JComponent) c;
                     jc.setToolTipText("<html>" + record.getLyrics().replaceAll("\n", "<br/>") + "</html>");
@@ -103,7 +111,7 @@ public class MainFrame extends JFrame implements ActionListener {
             new Thread(() -> {
                 running = true;
 
-                invokeLater(() -> enableButtons(false));
+                invokeLater(this::disableButtons);
 
                 progress.setShowValues(false);
                 progress.setIndeterminate(true);
@@ -115,10 +123,11 @@ public class MainFrame extends JFrame implements ActionListener {
                 progress.setShowValues(true);
                 progress.setIndeterminate(false);
 
-                for (File aFile : allFiles) {
-                    if (!running)
+                for (File file : allFiles) {
+                    if (!running) {
                         break;
-                    tagger.readFile(aFile);
+                    }
+                    tagger.readFile(file).ifPresent(records::add);
                     invokeLater(() -> {
                         table.repaint();
                         table.revalidate();
@@ -135,14 +144,14 @@ public class MainFrame extends JFrame implements ActionListener {
                 }
 
                 public int getRowCount() {
-                    return tagger.getRecords().size();
+                    return records.size();
                 }
 
                 public Object getValueAt(int row, int col) {
                     if (col == 0) // row number
                         return row + 1;
                     else { // record value
-                        AudioFileRecord record = tagger.getRecords().get(row);
+                        AudioFileRecord record = records.get(row);
                         if (col == 1)
                             return record.getArtist();
                         if (col == 2)
@@ -169,22 +178,22 @@ public class MainFrame extends JFrame implements ActionListener {
         new Thread(() -> {
             running = true;
 
-            invokeLater(() -> enableButtons(false));
+            invokeLater(this::disableButtons);
 
-            progress.setMaximum(tagger.getRecords().size());
+            progress.setMaximum(records.size());
             progress.setValue(0);
             progress.setShowValues(true);
             progress.setIndeterminate(false);
 
-            for (AudioFileRecord aRecord : tagger.getRecords()) {
+            for (AudioFileRecord record : records) {
                 if (!running)
                     break;
-                String lyrics = finder.findLyrics(aRecord.getArtist(), aRecord.getTitle());
+                String lyrics = finder.findLyrics(record.getArtist(), record.getTitle());
                 if (lyrics != null) {
-                    aRecord.setLyrics(lyrics);
-                    aRecord.setStatus("LYRICS FOUND");
+                    record.setLyrics(lyrics);
+                    record.setStatus("LYRICS FOUND");
                 } else {
-                    aRecord.setStatus("NO LYRICS FOUND");
+                    record.setStatus("NO LYRICS FOUND");
                 }
                 invokeLater(() -> {
                     table.repaint();
@@ -194,8 +203,9 @@ public class MainFrame extends JFrame implements ActionListener {
                 progress.setValue(progress.getValue() + 1);
             }
 
-            if (running)
+            if (running) {
                 switchButtons(Step.WRITE_LYRICS);
+            }
         }).start();
     }
 
@@ -203,34 +213,35 @@ public class MainFrame extends JFrame implements ActionListener {
         new Thread(() -> {
             running = true;
 
-            invokeLater(() -> enableButtons(false));
+            invokeLater(this::disableButtons);
 
-            progress.setMaximum(tagger.getRecords().size());
+            List<AudioFileRecord> recordsWithLyrics = records.stream().filter(r -> r.getLyrics() != null).collect(toList());
+
+            progress.setMaximum(recordsWithLyrics.size());
             progress.setValue(0);
             progress.setShowValues(true);
             progress.setIndeterminate(false);
 
-            for (AudioFileRecord aRecord : tagger.getRecords()) {
+            for (AudioFileRecord record : recordsWithLyrics) {
                 if (!running)
                     break;
                 try {
-                    if (aRecord.getLyrics() != null) {
-                        tagger.writeToFile(aRecord.getFile(), FieldKey.LYRICS, aRecord.getLyrics());
-                        aRecord.setStatus("LYRICS WRITTEN");
-                        invokeLater(new Runnable() {
-                            public void run() {
-                                table.repaint();
-                                table.revalidate();
-                            }
-                        });
-                    }
+                    tagger.writeToFile(record.getFile(), FieldKey.LYRICS, record.getLyrics());
+                    record.setStatus("LYRICS WRITTEN");
+                    invokeLater(new Runnable() {
+                        public void run() {
+                            table.repaint();
+                            table.revalidate();
+                        }
+                    });
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Failed to write lyrics to file: {}", record.getFile().getAbsolutePath(), e);
                 }
                 progress.setValue(progress.getValue() + 1);
             }
-            if (running)
+            if (running) {
                 switchButtons(Step.READ_FILES);
+            }
         }).start();
     }
 
@@ -238,71 +249,35 @@ public class MainFrame extends JFrame implements ActionListener {
         switch (step) {
             case READ_FILES:
                 invokeLater(() -> {
-                    button1.setActionCommand(ACTION_COMMAND_FIND_FILES);
-                    button1.setText("Add music library path");
-                    enableButtons(false);
+                    disableButtons();
                     button1.setEnabled(true);
                 });
                 break;
             case FIND_LYRICS:
                 invokeLater(() -> {
-                    button2.setActionCommand(ACTION_COMMAND_FIND_LYRICS);
-                    button2.setText("Find lyrics");
-                    enableButtons(false);
+                    disableButtons();
                     button2.setEnabled(true);
                 });
                 break;
             case WRITE_LYRICS:
                 invokeLater(() -> {
-                    button3.setActionCommand(ACTION_COMMAND_WRITE_LYRICS);
-                    button3.setText("Write lyrics");
-                    enableButtons(false);
+                    disableButtons();
                     button3.setEnabled(true);
                 });
                 break;
             default:
-                invokeLater(() -> enableButtons(false));
+                invokeLater(this::disableButtons);
         }
     }
 
-    private void enableButtons(boolean enable) {
-        button1.setEnabled(enable);
-        button2.setEnabled(enable);
-        button3.setEnabled(enable);
+    private void disableButtons() {
+        button1.setEnabled(false);
+        button2.setEnabled(false);
+        button3.setEnabled(false);
     }
 
     private enum Step {
-        READ_FILES, FIND_LYRICS, WRITE_LYRICS;
-
-        Step next() {
-            switch (this) {
-                case READ_FILES:
-                    return FIND_LYRICS;
-                case FIND_LYRICS:
-                    return WRITE_LYRICS;
-                case WRITE_LYRICS:
-                default:
-                    return READ_FILES;
-            }
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (ACTION_COMMAND_FIND_FILES.equals(e.getActionCommand())) {
-            int returnVal = fileChooser.showOpenDialog(MainFrame.this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                baseDir = fileChooser.getSelectedFile();
-                findAudioFiles();
-            }
-        } else if (ACTION_COMMAND_FIND_LYRICS.equals(e.getActionCommand())) {
-            findLyrics();
-        } else if (ACTION_COMMAND_WRITE_LYRICS.equals(e.getActionCommand())) {
-            writeLyrics();
-        } else if (ACTION_COMMAND_CANCEL.equals(e.getActionCommand())) {
-            running = false;
-            switchButtons(Step.READ_FILES);
-        }
+        READ_FILES, FIND_LYRICS, WRITE_LYRICS
     }
 
 }
