@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import static java.awt.BorderLayout.*;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.SwingUtilities.invokeLater;
@@ -25,7 +26,6 @@ public class Main extends JFrame {
     private Table table;
 
     private ActionPanel actionPanel = new ActionPanel(this);
-    private JProgressBar progress = new JProgressBar();
 
     @Getter
     @Setter
@@ -34,19 +34,11 @@ public class Main extends JFrame {
     public Main(String title) {
         super(title);
 
+        setSize(1024, 768);
+
         JPanel panel = new JPanel(new BorderLayout());
 
-        JPanel northPanel = new JPanel();
-        panel.add(northPanel, NORTH);
-
-        northPanel.add(actionPanel);
-
-        JPanel southPanel = new JPanel();
-        progress.setStringPainted(true);
-        progress.setIndeterminate(false);
-        southPanel.add(progress);
-
-        panel.add(southPanel, SOUTH);
+        panel.add(actionPanel, NORTH);
 
         table = new Table(this);
 
@@ -56,11 +48,21 @@ public class Main extends JFrame {
     }
 
     <T> void processActionAndUpdateGUI(Collection<T> items, Function<T, Boolean> action, String message) {
-        new Thread(() -> {
-            actionPanel.disableAll();
+        JProgressBar progress = new JProgressBar();
+        progress.setMaximum(items.size());
+        progress.setValue(0);
 
-            progress.setMaximum(items.size());
-            progress.setValue(0);
+        final JDialog dialog = new JDialog(this, "Processing...", true);
+        dialog.add(CENTER, progress);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        dialog.setSize(300, 75);
+        dialog.setLocationRelativeTo(this);
+
+        progress.setStringPainted(true);
+        progress.setIndeterminate(false);
+
+        new Thread(() -> {
+            invokeLater(() -> dialog.setVisible(true));
 
             AtomicInteger count = new AtomicInteger();
 
@@ -80,6 +82,7 @@ public class Main extends JFrame {
             });
 
             actionPanel.next();
+            invokeLater(() -> dialog.setVisible(false));
             showMessageDialog(this, format(message, count.get()));
         }).start();
     }

@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Function;
 
-import static de.toomuchcoffee.lyricstagger.gui.Step.*;
+import static de.toomuchcoffee.lyricstagger.gui.ActionPanel.Step.*;
 import static de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord.Status.*;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
@@ -24,7 +24,7 @@ class ActionPanel extends JPanel {
     private LyricsWikiaFinder finder = new LyricsWikiaFinder();
     private Tagger tagger = new Tagger();
 
-    private Step step = Step.START;
+    private Step step = START;
 
     private Map<Step, JButton> buttons = ImmutableMap.of(
             READ_FILES, new JButton("Add music library path"),
@@ -46,15 +46,8 @@ class ActionPanel extends JPanel {
     }
 
     void next() {
-        disableAll();
         step = step.next();
-        invokeLater(() -> buttons.get(step).setEnabled(true));
-    }
-
-    void disableAll() {
-        invokeLater(() -> {
-            buttons.values().forEach(b -> b.setEnabled(false));
-        });
+        invokeLater(() -> buttons.forEach((key, value) -> value.setEnabled(key == step)));
     }
 
     private void findAudioFiles() {
@@ -108,5 +101,22 @@ class ActionPanel extends JPanel {
         };
 
         main.processActionAndUpdateGUI(recordsWithLyrics, writeLyrics, "Lyrics for %d songs have been written!");
+    }
+
+    enum Step {
+        START, READ_FILES, FIND_LYRICS, WRITE_LYRICS;
+
+        public Step next() {
+            switch (this) {
+                case READ_FILES:
+                    return FIND_LYRICS;
+                case FIND_LYRICS:
+                    return WRITE_LYRICS;
+                case START:
+                case WRITE_LYRICS:
+                default:
+                    return READ_FILES;
+            }
+        }
     }
 }

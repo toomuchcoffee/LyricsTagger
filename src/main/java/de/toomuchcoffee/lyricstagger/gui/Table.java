@@ -7,6 +7,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+import static java.awt.Color.*;
+
 class Table extends JTable {
     private static final int COL_STATUS = 5;
     private static final int COL_LYRICS = 6;
@@ -24,14 +26,14 @@ class Table extends JTable {
 
                 switch (status) {
                     case LYRICS_FOUND:
-                        setBackground(Color.YELLOW);
+                        setBackground(YELLOW);
                         setToolTipText((String) table.getModel().getValueAt(row, COL_LYRICS));
                         break;
                     case LYRICS_WRITTEN:
-                        setBackground(Color.GREEN);
+                        setBackground(GREEN);
                         break;
                     case LYRICS_NOT_FOUND:
-                        setBackground(Color.LIGHT_GRAY);
+                        setBackground(LIGHT_GRAY);
                         break;
                     case INITIAL:
                     default:
