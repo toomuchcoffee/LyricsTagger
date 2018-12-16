@@ -1,4 +1,4 @@
-package de.toomuchcoffee.itags.tagging;
+package de.toomuchcoffee.lyricstagger.tagging;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.audio.AudioFile;

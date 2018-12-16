@@ -1,4 +1,4 @@
-package de.toomuchcoffee.itags.gui;
+package de.toomuchcoffee.lyricstagger.gui;
 
 import javax.swing.*;
 

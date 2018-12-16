@@ -1,4 +1,4 @@
-package de.toomuchcoffee.itags.tagging;
+package de.toomuchcoffee.lyricstagger.tagging;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

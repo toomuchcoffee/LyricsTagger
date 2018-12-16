@@ -1,8 +1,8 @@
-package de.toomuchcoffee.itags.gui;
+package de.toomuchcoffee.lyricstagger.gui;
 
-import de.toomuchcoffee.itags.lyrics.LyricsWikiaFinder;
-import de.toomuchcoffee.itags.tagging.AudioFileRecord;
-import de.toomuchcoffee.itags.tagging.Tagger;
+import de.toomuchcoffee.lyricstagger.lyrics.LyricsWikiaFinder;
+import de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord;
+import de.toomuchcoffee.lyricstagger.tagging.Tagger;
 import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.tag.FieldKey;
 
@@ -21,9 +21,7 @@ import static org.apache.commons.io.FileUtils.listFiles;
 
 
 @Slf4j
-public class MainFrame extends JFrame {
-    private JFileChooser fileChooser;
-
+public class Main extends JFrame {
     private JButton button1 = new JButton("Add music library path");
     private JButton button2 = new JButton("Find lyrics");
     private JButton button3 = new JButton("Write lyrics");
@@ -32,30 +30,27 @@ public class MainFrame extends JFrame {
 
     private ProgressBar progress = new ProgressBar();
 
-    private File baseDir;
-    private String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "File", "Status"};
-    private Tagger tagger;
-
-    private boolean running;
-
     private List<AudioFileRecord> records = new ArrayList<>();
 
-    private MainFrame(String title) {
+    private LyricsWikiaFinder finder = new LyricsWikiaFinder();
+    private Tagger tagger = new Tagger();
+
+    public Main(String title) {
         super(title);
 
         JPanel p = new JPanel(new BorderLayout());
 
-        fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         JPanel btnsNorth = new JPanel();
         p.add(btnsNorth, BorderLayout.NORTH);
 
         button1.addActionListener(e -> {
-            int returnVal = fileChooser.showOpenDialog(MainFrame.this);
+            int returnVal = fileChooser.showOpenDialog(Main.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                baseDir = fileChooser.getSelectedFile();
-                findAudioFiles();
+                File baseDir = fileChooser.getSelectedFile();
+                findAudioFiles(baseDir);
             }
         });
         button2.addActionListener(e -> findLyrics());
@@ -73,13 +68,6 @@ public class MainFrame extends JFrame {
 
         p.add(btnsSouth, BorderLayout.SOUTH);
 
-        JButton cancelBtn = new JButton("Cancel");
-        cancelBtn.addActionListener(e -> {
-            running = false;
-            switchButtons(Step.READ_FILES);
-        });
-        btnsSouth.add(cancelBtn);
-
         table = new JTable() {
             public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
                 Component c = super.prepareRenderer(renderer, row, col);
@@ -96,37 +84,23 @@ public class MainFrame extends JFrame {
         getContentPane().add(p);
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new MainFrame("Add lyrics to your music library");
-
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    private void findAudioFiles() {
+    private void findAudioFiles(File baseDir) {
+        records = new ArrayList<>();
         if (baseDir != null && baseDir.exists() && baseDir.isDirectory()) {
-            tagger = new Tagger();
-
             new Thread(() -> {
-                running = true;
-
                 invokeLater(this::disableButtons);
 
                 progress.setShowValues(false);
                 progress.setIndeterminate(true);
 
-                Collection<File> allFiles = listFiles(baseDir, null, true);
+                Collection<File> files = listFiles(baseDir, null, true);
 
-                progress.setMaximum(allFiles.size());
+                progress.setMaximum(files.size());
                 progress.setValue(0);
                 progress.setShowValues(true);
                 progress.setIndeterminate(false);
 
-                for (File file : allFiles) {
-                    if (!running) {
-                        break;
-                    }
+                for (File file : files) {
                     tagger.readFile(file).ifPresent(records::add);
                     invokeLater(() -> {
                         table.repaint();
@@ -139,6 +113,8 @@ public class MainFrame extends JFrame {
             }).start();
 
             table.setModel(new DefaultTableModel() {
+                private String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "File", "Status"};
+
                 public int getColumnCount() {
                     return columns.length;
                 }
@@ -148,22 +124,22 @@ public class MainFrame extends JFrame {
                 }
 
                 public Object getValueAt(int row, int col) {
-                    if (col == 0) // row number
-                        return row + 1;
-                    else { // record value
-                        AudioFileRecord record = records.get(row);
-                        if (col == 1)
-                            return record.getArtist();
-                        if (col == 2)
-                            return record.getAlbum();
-                        if (col == 3)
-                            return record.getTitle();
-                        if (col == 4)
-                            return record.getFile().getName();
-                        if (col == 5)
-                            return record.getStatus();
+                    switch (col) {
+                        case 0:
+                            return row + 1;
+                        case 1:
+                            return records.get(row).getArtist();
+                        case 2:
+                            return records.get(row).getAlbum();
+                        case 3:
+                            return records.get(row).getTitle();
+                        case 4:
+                            return records.get(row).getFile().getName();
+                        case 5:
+                            return records.get(row).getStatus();
+                        default:
+                            return null;
                     }
-                    return null;
                 }
 
                 public String getColumnName(int col) {
@@ -174,10 +150,7 @@ public class MainFrame extends JFrame {
     }
 
     private void findLyrics() {
-        LyricsWikiaFinder finder = new LyricsWikiaFinder();
         new Thread(() -> {
-            running = true;
-
             invokeLater(this::disableButtons);
 
             progress.setMaximum(records.size());
@@ -186,8 +159,6 @@ public class MainFrame extends JFrame {
             progress.setIndeterminate(false);
 
             for (AudioFileRecord record : records) {
-                if (!running)
-                    break;
                 String lyrics = finder.findLyrics(record.getArtist(), record.getTitle());
                 if (lyrics != null) {
                     record.setLyrics(lyrics);
@@ -203,16 +174,12 @@ public class MainFrame extends JFrame {
                 progress.setValue(progress.getValue() + 1);
             }
 
-            if (running) {
-                switchButtons(Step.WRITE_LYRICS);
-            }
+            switchButtons(Step.WRITE_LYRICS);
         }).start();
     }
 
     private void writeLyrics() {
         new Thread(() -> {
-            running = true;
-
             invokeLater(this::disableButtons);
 
             List<AudioFileRecord> recordsWithLyrics = records.stream().filter(r -> r.getLyrics() != null).collect(toList());
@@ -223,25 +190,19 @@ public class MainFrame extends JFrame {
             progress.setIndeterminate(false);
 
             for (AudioFileRecord record : recordsWithLyrics) {
-                if (!running)
-                    break;
                 try {
                     tagger.writeToFile(record.getFile(), FieldKey.LYRICS, record.getLyrics());
                     record.setStatus("LYRICS WRITTEN");
-                    invokeLater(new Runnable() {
-                        public void run() {
-                            table.repaint();
-                            table.revalidate();
-                        }
+                    invokeLater(() -> {
+                        table.repaint();
+                        table.revalidate();
                     });
                 } catch (Exception e) {
                     log.error("Failed to write lyrics to file: {}", record.getFile().getAbsolutePath(), e);
                 }
                 progress.setValue(progress.getValue() + 1);
             }
-            if (running) {
-                switchButtons(Step.READ_FILES);
-            }
+            switchButtons(Step.READ_FILES);
         }).start();
     }
 

@@ -1,4 +1,4 @@
-package de.toomuchcoffee.itags.lyrics;
+package de.toomuchcoffee.lyricstagger.lyrics;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
@@ -52,7 +52,7 @@ class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
         return reachedLyricsBox && openDivCountInsideLyricsBox <= 0;
     }
 
-    public String getText() {
+    String getText() {
         return sb.toString();
     }
 }
