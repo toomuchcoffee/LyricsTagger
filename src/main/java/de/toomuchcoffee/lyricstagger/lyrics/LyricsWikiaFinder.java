@@ -22,12 +22,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 @Slf4j
 public class LyricsWikiaFinder {
 
-    private static final String NOT_LICENSED = "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.";
-    private static final String NOT_LICENSED2 = "We don't currently have a license for these lyrics. Please try again in a few days!";
+    private static final Set<String> NOT_LICENSED = newHashSet(
+            "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.",
+            "We don't currently have a license for these lyrics. Please try again in a few days!");
+    private static final String ENCLOSED_WITH_PARENTHESES_OR_BRACKETS = "[(\\[][^()]*?[)\\]]";
 
     public String findLyrics(String artist, String song) {
         String lyrics = null;
@@ -50,7 +55,7 @@ public class LyricsWikiaFinder {
     private List<Query> permuteQuery(Query query) {
         List<Query> queries = new ArrayList<>();
         queries.add(query);
-        queries.add(new Query(query.getArtist(), query.getSong().replaceAll("[(\\[][^()]*?[)\\]]", "")));
+        queries.add(new Query(query.getArtist(), query.getSong().replaceAll(ENCLOSED_WITH_PARENTHESES_OR_BRACKETS, "")));
         return queries;
     }
 
@@ -104,11 +109,14 @@ public class LyricsWikiaFinder {
         new ParserDelegator().parse(reader, htmlParser, true/*ignore charset*/);
         String lyrics = htmlParser.getText();
 
-        if (lyrics != null && (lyrics.contains(NOT_LICENSED) || lyrics.contains(NOT_LICENSED2))) {
-            return null;
-        } else {
-            return lyrics;
+        if (lyrics != null) {
+            for (String licenseText : NOT_LICENSED) {
+                if (lyrics.contains(licenseText)) {
+                    return null;
+                }
+            }
         }
+        return lyrics;
     }
 
 }
