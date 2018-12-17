@@ -19,12 +19,12 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class LyricsWikiaFinder {
@@ -32,12 +32,15 @@ public class LyricsWikiaFinder {
     private static final Set<String> NOT_LICENSED = newHashSet(
             "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.",
             "We don't currently have a license for these lyrics. Please try again in a few days!");
-    private static final String ENCLOSED_WITH_PARENTHESES_OR_BRACKETS = "[(\\[][^()]*?[)\\]]";
+
+    private QueryPermuter permuter = new QueryPermuter();
 
     public String findLyrics(String artist, String song) {
         String lyrics = null;
 
-        List<Query> queries = permuteQuery(new Query(artist, song));
+        List<Query> queries = permuter.permuteSongTitle(song).stream()
+                .map(s -> new Query(artist, s))
+                .collect(toList());
 
         Iterator<Query> it = queries.iterator();
         while (it.hasNext() && lyrics == null) {
@@ -50,13 +53,6 @@ public class LyricsWikiaFinder {
         }
 
         return lyrics;
-    }
-
-    private List<Query> permuteQuery(Query query) {
-        List<Query> queries = new ArrayList<>();
-        queries.add(query);
-        queries.add(new Query(query.getArtist(), query.getSong().replaceAll(ENCLOSED_WITH_PARENTHESES_OR_BRACKETS, "")));
-        return queries;
     }
 
     @Getter
@@ -87,6 +83,7 @@ public class LyricsWikiaFinder {
 
     private Document getDocument(String artist, String song) throws URISyntaxException, ParserConfigurationException, SAXException, IOException {
         URL url = buildUrl(artist, song);
+        log.info("Request url: {}", url);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         return db.parse(url.openStream());

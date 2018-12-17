@@ -32,4 +32,16 @@ public class LyricsWikiaFinderTest {
         String lyrics = finder.findLyrics("Deodato", "Also Sprach Zarathustra (2001)");
         assertThat(lyrics).isNotNull();
     }
+
+    @Test
+    public void findLyricsWhichShouldHaveAnAmpersand() {
+        String lyrics = finder.findLyrics("Steve Vai", "Here And Now");
+        assertThat(lyrics).isNotNull();
+    }
+
+    @Test
+    public void findLyricsWithoutExclamationMark() {
+        String lyrics = finder.findLyrics("The Who", "We're Not Gonna Take It !");
+        assertThat(lyrics).isNotNull();
+    }
 }
