@@ -44,4 +44,12 @@ public class LyricsWikiaFinderTest {
         String lyrics = finder.findLyrics("The Who", "We're Not Gonna Take It !");
         assertThat(lyrics).isNotNull();
     }
+
+    @Test
+    public void findLyricsForMedleys() {
+        String lyrics = finder.findLyrics("The Beatles", "being for the benefit of mr. kite / i want you (she's so heavy) / helter skelter");
+        assertThat(lyrics).containsIgnoringCase("The Hendersons");
+        assertThat(lyrics).containsIgnoringCase("I want you so bad");
+        assertThat(lyrics).containsIgnoringCase("Helter Skelter");
+    }
 }

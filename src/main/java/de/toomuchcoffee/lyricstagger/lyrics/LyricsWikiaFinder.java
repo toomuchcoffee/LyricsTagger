@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -52,11 +53,37 @@ public class LyricsWikiaFinder {
             }
         }
 
+        if (lyrics == null) {
+            Optional<String> mergedLyrics = mergedLyrics(new Query(artist, song));
+            if (mergedLyrics.isPresent()) {
+                return mergedLyrics.get();
+            }
+        }
+
         if (lyrics != null && lyrics.trim().length() == 0) {
             return null;
         }
 
         return lyrics;
+    }
+
+    private Optional<String> mergedLyrics(Query query) {
+        if (query.getSong().contains("/")) {
+            String[] parts = query.getSong().split("/");
+            StringBuilder sb = new StringBuilder();
+            for (String part : parts) {
+                String lyrics = findLyrics(query.getArtist(), part);
+                if (lyrics == null) {
+                    return Optional.empty();
+                }
+                sb.append("\n\n\n");
+                sb.append(part.trim().toUpperCase());
+                sb.append("\n\n");
+                sb.append(lyrics);
+            }
+            return Optional.of(sb.toString().trim());
+        }
+        return Optional.empty();
     }
 
     @Getter
