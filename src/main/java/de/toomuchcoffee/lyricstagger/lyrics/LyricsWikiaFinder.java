@@ -52,6 +52,10 @@ public class LyricsWikiaFinder {
             }
         }
 
+        if (lyrics != null && lyrics.trim().length() == 0) {
+            return null;
+        }
+
         return lyrics;
     }
 
