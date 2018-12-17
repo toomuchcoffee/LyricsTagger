@@ -75,9 +75,9 @@ class ActionPanel extends JPanel {
 
     private void findLyrics() {
         Function<AudioFileRecord, Boolean> findLyrics = record -> {
-            String lyrics = finder.findLyrics(record.getArtist(), record.getTitle());
-            if (lyrics != null) {
-                record.setLyrics(lyrics);
+            Optional<String> lyrics = finder.findLyrics(record.getArtist(), record.getTitle());
+            if (lyrics.isPresent()) {
+                record.setLyrics(lyrics.get());
                 record.setStatus(LYRICS_FOUND);
                 return true;
             } else {
