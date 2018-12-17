@@ -24,8 +24,7 @@ import static javax.swing.SwingUtilities.invokeLater;
 public class Main extends JFrame {
 
     private Table table;
-
-    private ActionPanel actionPanel = new ActionPanel(this);
+    private ActionPanel actionPanel;
 
     @Getter
     @Setter
@@ -38,10 +37,10 @@ public class Main extends JFrame {
 
         JPanel panel = new JPanel(new BorderLayout());
 
+        actionPanel = new ActionPanel(this);
         panel.add(actionPanel, NORTH);
 
         table = new Table(this);
-
         panel.add(new JScrollPane(table), CENTER);
 
         getContentPane().add(panel);

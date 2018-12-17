@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.fail;
 
 
 public class LyricsWikiaFinderTest {
@@ -14,15 +15,21 @@ public class LyricsWikiaFinderTest {
     @Test
     public void happyPath() {
         Optional<String> lyrics = finder.findLyrics("Queen", "Radio Ga Ga");
-        assertThat(lyrics).isPresent();
-        assertThat(lyrics.get()).startsWith("I'd sit alone and watch your light");
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).startsWith("I'd sit alone and watch your light");
+        } else {
+            fail();
+        }
     }
 
     @Test
     public void identifyInstrumental() {
         Optional<String> lyrics = finder.findLyrics("Deodato", "Also Sprach Zarathustra");
-        assertThat(lyrics).isPresent();
-        assertThat(lyrics.get()).isEqualTo("Instrumental");
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).isEqualTo("Instrumental");
+        } else {
+            fail();
+        }
     }
 
     @Test
@@ -34,12 +41,6 @@ public class LyricsWikiaFinderTest {
     @Test
     public void dontFindLyricsForNonExistingSong() {
         Optional<String> lyrics = finder.findLyrics("Foo", "Bar");
-        assertThat(lyrics).isNotPresent();
-    }
-
-    @Test
-    public void dontFindEmptyLyrics() {
-        Optional<String> lyrics = finder.findLyrics("Flake Music", "(Untitled)");
         assertThat(lyrics).isNotPresent();
     }
 
@@ -64,9 +65,12 @@ public class LyricsWikiaFinderTest {
     @Test
     public void findLyricsForMedleys() {
         Optional<String> lyrics = finder.findLyrics("The Beatles", "being for the benefit of mr. kite / i want you (she's so heavy) / helter skelter");
-        assertThat(lyrics).isPresent();
-        assertThat(lyrics.get()).containsIgnoringCase("The Hendersons");
-        assertThat(lyrics.get()).containsIgnoringCase("I want you so bad");
-        assertThat(lyrics.get()).containsIgnoringCase("Helter Skelter");
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).containsIgnoringCase("The Hendersons");
+            assertThat(lyrics.get()).containsIgnoringCase("I want you so bad");
+            assertThat(lyrics.get()).containsIgnoringCase("Helter Skelter");
+        } else {
+            fail();
+        }
     }
 }

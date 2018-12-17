@@ -26,7 +26,7 @@ class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
     private boolean reachedLyricsBox;
     private int openDivCountInsideLyricsBox = 0;
 
-    public Optional<String> findLyrics(String urlString) {
+    Optional<String> findLyrics(String urlString) {
         try {
             URL url = new URL(urlString);
             InputStreamReader stream = new InputStreamReader(url.openStream());

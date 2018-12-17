@@ -44,7 +44,7 @@ class Table extends JTable {
         });
 
         setModel(new DefaultTableModel() {
-            private String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "File"};
+            private String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "Lyrics"};
 
             public int getColumnCount() {
                 return columns.length;
@@ -65,11 +65,10 @@ class Table extends JTable {
                     case 3:
                         return main.getRecords().get(row).getTitle();
                     case 4:
-                        return main.getRecords().get(row).getFile().getName();
+                        return main.getRecords().get(row).getLyrics();
                     case 5:
                         return main.getRecords().get(row).getStatus();
                     case 6:
-                        return "<html>" + main.getRecords().get(row).getLyrics().replaceAll("\n", "<br/>") + "</html>";
                     default:
                         return null;
                 }
