@@ -14,8 +14,9 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class LyricsWikiaFinder {
 
-    private LyricsWikiaXmlParser xmlParser = new LyricsWikiaXmlParser();
     private QueryPermuter permuter = new QueryPermuter();
+    private LyricsWikiaXmlParser xmlParser = new LyricsWikiaXmlParser();
+    private LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
 
     public Optional<String> findLyrics(String artist, String song) {
         Optional<String> lyrics = findSongLyrics(artist, song);
@@ -32,7 +33,11 @@ public class LyricsWikiaFinder {
 
         for (Query query : queries) {
             try {
-                Optional<String> lyrics = xmlParser.findLyrics(query);
+                Optional<String> lyrics = Optional.empty();
+                Optional<String> lyricsUrl = xmlParser.findLyrics(query);
+                if (lyricsUrl.isPresent()) {
+                    lyrics = htmlParser.findLyrics(lyricsUrl.get());
+                }
                 if (lyrics.isPresent()) {
                     return lyrics;
                 }

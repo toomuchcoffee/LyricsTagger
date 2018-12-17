@@ -6,32 +6,19 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.swing.text.html.parser.ParserDelegator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 
 @Slf4j
-public class LyricsWikiaXmlParser {
+class LyricsWikiaXmlParser {
 
-    private static final Set<String> NOT_LICENSED = newHashSet(
-            "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.",
-            "We don't currently have a license for these lyrics. Please try again in a few days!");
-
-    private final LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
-
-    public Optional<String> findLyrics(Query query) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
+    Optional<String> findLyrics(Query query) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
         Document doc = getDocument(query.getArtist(), query.getSong());
         doc.getDocumentElement().normalize();
         Element lyricsElem = (Element) doc.getElementsByTagName("lyrics").item(0);
@@ -44,7 +31,7 @@ public class LyricsWikiaXmlParser {
         } else {
             Element urlElem = (Element) doc.getElementsByTagName("url").item(0);
             String lyricsUrlString = urlElem.getTextContent();
-            return parseHtml(lyricsUrlString);
+            return Optional.ofNullable(lyricsUrlString);
         }
     }
 
@@ -64,20 +51,4 @@ public class LyricsWikiaXmlParser {
         b.addParameter("song", song);
         return b.build().toURL();
     }
-
-    private Optional<String> parseHtml(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        InputStreamReader stream = new InputStreamReader(url.openStream());
-        Reader reader = new BufferedReader(stream);
-        new ParserDelegator().parse(reader, htmlParser, true);
-        String lyrics = htmlParser.getText().trim();
-
-        for (String licenseText : NOT_LICENSED) {
-            if (lyrics.contains(licenseText)) {
-                return Optional.empty();
-            }
-        }
-        return Optional.ofNullable(lyrics.length() == 0 ? null : lyrics);
-    }
-
 }

@@ -3,11 +3,40 @@ package de.toomuchcoffee.lyricstagger.lyrics;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
+    private static final Set<String> NOT_LICENSED = newHashSet(
+            "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.",
+            "We don't currently have a license for these lyrics. Please try again in a few days!");
+
     private StringBuilder sb = new StringBuilder();
     private boolean reachedLyricsBox;
     private int openDivCountInsideLyricsBox = 0;
+
+    public Optional<String> findLyrics(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        InputStreamReader stream = new InputStreamReader(url.openStream());
+        Reader reader = new BufferedReader(stream);
+        new ParserDelegator().parse(reader, this, true);
+        String lyrics = getText().trim();
+
+        for (String licenseText : NOT_LICENSED) {
+            if (lyrics.contains(licenseText)) {
+                return Optional.empty();
+            }
+        }
+        return Optional.ofNullable(lyrics.length() == 0 ? null : lyrics);
+    }
 
     @Override
     public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet a, int pos) {
@@ -52,7 +81,7 @@ class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
         return reachedLyricsBox && openDivCountInsideLyricsBox <= 0;
     }
 
-    String getText() {
+    private String getText() {
         return sb.toString();
     }
 }
