@@ -1,15 +1,8 @@
 package de.toomuchcoffee.lyricstagger.lyrics;
 
 import lombok.extern.slf4j.Slf4j;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class LyricsWikiaFinder {
@@ -27,25 +20,14 @@ public class LyricsWikiaFinder {
     }
 
     private Optional<String> findSongLyrics(String artist, String song) {
-        List<Query> queries = permuter.permuteSongTitle(song).stream()
+        return permuter.permuteSongTitle(song).parallelStream()
                 .map(s -> new Query(artist, s))
-                .collect(toList());
-
-        for (Query query : queries) {
-            try {
-                Optional<String> lyrics = Optional.empty();
-                Optional<String> lyricsUrl = xmlParser.findLyrics(query);
-                if (lyricsUrl.isPresent()) {
-                    lyrics = htmlParser.findLyrics(lyricsUrl.get());
-                }
-                if (lyrics.isPresent()) {
-                    return lyrics;
-                }
-            } catch (IOException | URISyntaxException | SAXException | ParserConfigurationException e) {
-                log.warn("Failed to find lyrics for artist {} and song {}", artist, song, e);
-            }
-        }
-        return Optional.empty();
+                .map(query -> xmlParser.findLyrics(query)
+                        .map(url -> htmlParser.findLyrics(url))
+                        .flatMap(f -> f))
+                .filter(Optional::isPresent)
+                .findFirst()
+                .flatMap(f -> f);
     }
 
     private Optional<String> findMedleyLyrics(String artist, String song) {

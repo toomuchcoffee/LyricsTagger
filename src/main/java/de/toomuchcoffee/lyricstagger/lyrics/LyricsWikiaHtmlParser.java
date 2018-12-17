@@ -1,5 +1,7 @@
 package de.toomuchcoffee.lyricstagger.lyrics;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
@@ -14,6 +16,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 
+@Slf4j
 class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
     private static final Set<String> NOT_LICENSED = newHashSet(
             "Unfortunately, we are not licensed to display the full lyrics for this song at the moment.",
@@ -23,19 +26,24 @@ class LyricsWikiaHtmlParser extends HTMLEditorKit.ParserCallback {
     private boolean reachedLyricsBox;
     private int openDivCountInsideLyricsBox = 0;
 
-    public Optional<String> findLyrics(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        InputStreamReader stream = new InputStreamReader(url.openStream());
-        Reader reader = new BufferedReader(stream);
-        new ParserDelegator().parse(reader, this, true);
-        String lyrics = getText().trim();
+    public Optional<String> findLyrics(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            InputStreamReader stream = new InputStreamReader(url.openStream());
+            Reader reader = new BufferedReader(stream);
+            new ParserDelegator().parse(reader, this, true);
+            String lyrics = getText().trim();
 
-        for (String licenseText : NOT_LICENSED) {
-            if (lyrics.contains(licenseText)) {
-                return Optional.empty();
+            for (String licenseText : NOT_LICENSED) {
+                if (lyrics.contains(licenseText)) {
+                    return Optional.empty();
+                }
             }
+            return Optional.ofNullable(lyrics.length() == 0 ? null : lyrics);
+        } catch (IOException e) {
+            log.warn("Failed to find lyrics for url {}", urlString, e);
+            return Optional.empty();
         }
-        return Optional.ofNullable(lyrics.length() == 0 ? null : lyrics);
     }
 
     @Override

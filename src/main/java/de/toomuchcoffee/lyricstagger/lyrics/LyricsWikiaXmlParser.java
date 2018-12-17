@@ -18,20 +18,25 @@ import java.util.Optional;
 @Slf4j
 class LyricsWikiaXmlParser {
 
-    Optional<String> findLyrics(Query query) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
-        Document doc = getDocument(query.getArtist(), query.getSong());
-        doc.getDocumentElement().normalize();
-        Element lyricsElem = (Element) doc.getElementsByTagName("lyrics").item(0);
-        if (lyricsElem == null) {
+    Optional<String> findLyrics(Query query)  {
+        try {
+            Document doc = getDocument(query.getArtist(), query.getSong());
+            doc.getDocumentElement().normalize();
+            Element lyricsElem = (Element) doc.getElementsByTagName("lyrics").item(0);
+            if (lyricsElem == null) {
+                return Optional.empty();
+            }
+            String lyricsAbstract = lyricsElem.getTextContent();
+            if (lyricsAbstract == null || lyricsAbstract.trim().length() == 0 || "not found".equalsIgnoreCase(lyricsAbstract)) {
+                return Optional.empty();
+            } else {
+                Element urlElem = (Element) doc.getElementsByTagName("url").item(0);
+                String lyricsUrlString = urlElem.getTextContent();
+                return Optional.ofNullable(lyricsUrlString);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to find lyrics for query {}", query, e);
             return Optional.empty();
-        }
-        String lyricsAbstract = lyricsElem.getTextContent();
-        if (lyricsAbstract == null || lyricsAbstract.trim().length() == 0 || "not found".equalsIgnoreCase(lyricsAbstract)) {
-            return Optional.empty();
-        } else {
-            Element urlElem = (Element) doc.getElementsByTagName("url").item(0);
-            String lyricsUrlString = urlElem.getTextContent();
-            return Optional.ofNullable(lyricsUrlString);
         }
     }
 
