@@ -75,7 +75,9 @@ public class Main extends JFrame {
                         table.revalidate();
                     });
                 } catch (Exception e) {
-                    log.error("Action {} failed for item {}", action, item, e);
+                    log.error("Action failed for item {}", item, e);
+                    JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage());
+                    System.exit(1);
                 }
                 progress.setValue(progress.getValue() + 1);
             });
