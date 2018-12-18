@@ -6,21 +6,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
-public class Finder {
+public class LyricsFinder {
 
     private static final double LEVENTSHTEIN_THRESHOLD_RATIO = 0.3;
 
     private LyricsWikiaJsonParser jsonParser = new LyricsWikiaJsonParser();
     private LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
-
-    private Map<String, Set<String>> cache;
-
-    public void reset() {
-        cache = new HashMap<>();
-    }
+    private SongsFinder songsFinder = new SongsFinder(jsonParser);
 
     public Optional<String> findLyrics(String artist, String song) {
         if (song.contains("/")) {
@@ -42,10 +39,8 @@ public class Finder {
     }
 
     private Optional<String> internalFindLyrics(String artist, String song) {
-        if (cache.get(artist) == null) {
-            cache.put(artist, jsonParser.findSongs(artist));
-        }
-        return findMostSimilarTerm(cache.get(artist), song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
+        Set<String> songs = songsFinder.getSongs(artist);
+        return findMostSimilarSongTitle(songs, song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
                 .map(query -> jsonParser.findLyrics(artist, query)
                         .map(htmlParser::findLyrics)
                         .flatMap(f -> f))
@@ -54,7 +49,7 @@ public class Finder {
     }
 
     @VisibleForTesting
-    Optional<String> findMostSimilarTerm(Set<String> pool, String q, int threshold) {
+    Optional<String> findMostSimilarSongTitle(Set<String> pool, String q, int threshold) {
         return pool.stream()
                 .map(p -> new StringWithDistance(p, LevenshteinDistance.getDefaultInstance().apply(p, q)))
                 .filter(s -> s.getDistance() <= threshold)

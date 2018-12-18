@@ -1,7 +1,7 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
 import com.google.common.collect.ImmutableMap;
-import de.toomuchcoffee.lyricstagger.lyrics.Finder;
+import de.toomuchcoffee.lyricstagger.lyrics.LyricsFinder;
 import de.toomuchcoffee.lyricstagger.records.AudioFileRecord;
 import de.toomuchcoffee.lyricstagger.records.Reader;
 import de.toomuchcoffee.lyricstagger.records.Writer;
@@ -22,7 +22,7 @@ import static org.apache.commons.io.FileUtils.listFiles;
 
 class ActionPanel extends JPanel {
     private Main main;
-    private Finder finder = new Finder();
+    private LyricsFinder lyricsFinder = new LyricsFinder();
     private Reader reader = new Reader();
     private Writer writer = new Writer();
 
@@ -48,23 +48,18 @@ class ActionPanel extends JPanel {
         buttons.values().forEach(this::add);
         next();
 
-        buttons.get(READ_FILES).addActionListener(e -> findAudioFiles());
+        buttons.get(READ_FILES).addActionListener(e -> readFiles());
         buttons.get(FIND_LYRICS).addActionListener(e -> findLyrics());
         buttons.get(WRITE_LYRICS).addActionListener(e -> writeLyrics());
     }
 
     void next() {
         step = step.next();
-
-        if (step == FIND_LYRICS) {
-            finder.reset();
-        }
-
         checkBox.setEnabled(step == START || step == READ_FILES);
         invokeLater(() -> buttons.forEach((key, value) -> value.setEnabled(key == step)));
     }
 
-    private void findAudioFiles() {
+    private void readFiles() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
 
@@ -75,7 +70,7 @@ class ActionPanel extends JPanel {
 
             Collection<File> files = listFiles(baseDir, null, true);
 
-            Function<File, Boolean> findFiles = file -> {
+            Function<File, Boolean> readFiles = file -> {
                 Optional<AudioFileRecord> recordOptional = reader.readFile(file, overwrite);
                 if (recordOptional.isPresent()) {
                     main.getRecords().add(recordOptional.get());
@@ -83,13 +78,13 @@ class ActionPanel extends JPanel {
                 }
                 return false;
             };
-            main.processActionAndUpdateGUI(files, findFiles, "%d audio files have been added!");
+            main.processActionAndUpdateGUI(files, readFiles, "%d audio files have been added!");
         }
     }
 
     private void findLyrics() {
         Function<AudioFileRecord, Boolean> findLyrics = record -> {
-            Optional<String> lyrics = finder.findLyrics(record.getArtist(), record.getTitle());
+            Optional<String> lyrics = lyricsFinder.findLyrics(record.getArtist(), record.getTitle());
             if (lyrics.isPresent()) {
                 record.setLyrics(lyrics.get());
                 record.setStatus(LYRICS_FOUND);

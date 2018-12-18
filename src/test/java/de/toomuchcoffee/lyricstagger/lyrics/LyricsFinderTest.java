@@ -10,13 +10,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.fail;
 
 
-public class FinderTest {
+public class LyricsFinderTest {
 
-    private Finder finder = new Finder();
+    private LyricsFinder lyricsFinder = new LyricsFinder();
 
     @Test
     public void happyPath() {
-        Optional<String> lyrics = finder.findLyrics("Queen", "Radio Ga Ga");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Queen", "Radio Ga Ga");
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).startsWith("I'd sit alone and watch your light");
         } else {
@@ -26,8 +26,8 @@ public class FinderTest {
 
     @Test
     public void shouldNotCacheResult() {
-        finder.findLyrics("Queen", "Radio Ga Ga");
-        Optional<String> lyrics = finder.findLyrics("Queen", "I Want To Break Free");
+        lyricsFinder.findLyrics("Queen", "Radio Ga Ga");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Queen", "I Want To Break Free");
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).startsWith("I want to break free");
         } else {
@@ -37,7 +37,7 @@ public class FinderTest {
 
     @Test
     public void identifyInstrumental() {
-        Optional<String> lyrics = finder.findLyrics("Deodato", "Also Sprach Zarathustra");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Deodato", "Also Sprach Zarathustra");
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).isEqualTo("Instrumental");
         } else {
@@ -47,37 +47,37 @@ public class FinderTest {
 
     @Test
     public void skipUnlicensedLyricsText() {
-        Optional<String> lyrics = finder.findLyrics("The Beach Boys", "Roller Skating Child");
+        Optional<String> lyrics = lyricsFinder.findLyrics("The Beach Boys", "Roller Skating Child");
         assertThat(lyrics).isNotPresent();
     }
 
     @Test
     public void dontFindLyricsForNonExistingSong() {
-        Optional<String> lyrics = finder.findLyrics("Foo", "Bar");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Foo", "Bar");
         assertThat(lyrics).isNotPresent();
     }
 
     @Test
     public void findLyricsForTitlesWhichRaiseSaxException() {
-        Optional<String> lyrics = finder.findLyrics("Deodato", "Also Sprach Zarathustra (2001)");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Deodato", "Also Sprach Zarathustra (2001)");
         assertThat(lyrics).isPresent();
     }
 
     @Test
     public void findLyricsWhichShouldHaveAnAmpersand() {
-        Optional<String> lyrics = finder.findLyrics("Steve Vai", "Here And Now");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Steve Vai", "Here And Now");
         assertThat(lyrics).isPresent();
     }
 
     @Test
     public void findLyricsWithoutExclamationMark() {
-        Optional<String> lyrics = finder.findLyrics("The Who", "We're Not Gonna Take It !");
+        Optional<String> lyrics = lyricsFinder.findLyrics("The Who", "We're Not Gonna Take It !");
         assertThat(lyrics).isPresent();
     }
 
     @Test
     public void findLyricsForMedleys() {
-        Optional<String> lyrics = finder.findLyrics("The Beatles", "being for the benefit of mr. kite / i want you (she's so heavy) / helter skelter");
+        Optional<String> lyrics = lyricsFinder.findLyrics("The Beatles", "being for the benefit of mr. kite / i want you (she's so heavy) / helter skelter");
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).containsIgnoringCase("The Hendersons");
             assertThat(lyrics.get()).containsIgnoringCase("I want you so bad");
@@ -128,7 +128,7 @@ public class FinderTest {
                 "Otherworld",
                 "Don't Tell The Kids");
 
-        songs.forEach(song -> finder.findMostSimilarTerm(pool, song, (int) (song.length() * 0.3))
+        songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song, (int) (song.length() * 0.3))
                 .ifPresent(t -> fail("No similarity wanted: " + song + ", but found: " + t)));
 
     }
