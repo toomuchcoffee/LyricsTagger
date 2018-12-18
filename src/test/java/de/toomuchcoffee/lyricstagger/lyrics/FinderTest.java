@@ -10,9 +10,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.fail;
 
 
-public class LyricsWikiaFinderTest {
+public class FinderTest {
 
-    private LyricsWikiaFinder finder = new LyricsWikiaFinder();
+    private Finder finder = new Finder();
 
     @Test
     public void happyPath() {

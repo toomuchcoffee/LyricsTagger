@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
-public class LyricsWikiaFinder {
+public class Finder {
 
     private static final double LEVENTSHTEIN_THRESHOLD_RATIO = 0.3;
 

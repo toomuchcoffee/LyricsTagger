@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.tagging;
+package de.toomuchcoffee.lyricstagger.records;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.audio.AudioFile;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.jaudiotagger.tag.FieldKey.*;
 
 @Slf4j
-public class Tagger {
+public class Reader {
     public Optional<AudioFileRecord> readFile(File file, boolean overwrite) {
         try {
             AudioFile f = AudioFileIO.read(file);
@@ -29,16 +29,4 @@ public class Tagger {
         }
         return Optional.empty();
     }
-
-    public void writeToFile(File file, String value) {
-        try {
-            AudioFile f = AudioFileIO.read(file);
-            Tag tag = f.getTag();
-            tag.setField(LYRICS, value);
-            f.commit();
-        } catch (Exception e) {
-            log.error("Failed to write to file: {}", file.getAbsolutePath(), e);
-        }
-    }
-
 }

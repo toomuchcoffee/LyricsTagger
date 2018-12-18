@@ -1,9 +1,10 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
 import com.google.common.collect.ImmutableMap;
-import de.toomuchcoffee.lyricstagger.lyrics.LyricsWikiaFinder;
-import de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord;
-import de.toomuchcoffee.lyricstagger.tagging.Tagger;
+import de.toomuchcoffee.lyricstagger.lyrics.Finder;
+import de.toomuchcoffee.lyricstagger.records.AudioFileRecord;
+import de.toomuchcoffee.lyricstagger.records.Reader;
+import de.toomuchcoffee.lyricstagger.records.Writer;
 
 import javax.swing.*;
 import java.io.File;
@@ -11,7 +12,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static de.toomuchcoffee.lyricstagger.gui.ActionPanel.Step.*;
-import static de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord.Status.*;
+import static de.toomuchcoffee.lyricstagger.records.AudioFileRecord.Status.*;
 import static java.awt.event.ItemEvent.SELECTED;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
@@ -21,8 +22,9 @@ import static org.apache.commons.io.FileUtils.listFiles;
 
 class ActionPanel extends JPanel {
     private Main main;
-    private LyricsWikiaFinder finder = new LyricsWikiaFinder();
-    private Tagger tagger = new Tagger();
+    private Finder finder = new Finder();
+    private Reader reader = new Reader();
+    private Writer writer = new Writer();
 
     private Step step = START;
 
@@ -69,7 +71,7 @@ class ActionPanel extends JPanel {
             Collection<File> files = listFiles(baseDir, null, true);
 
             Function<File, Boolean> findFiles = file -> {
-                Optional<AudioFileRecord> recordOptional = tagger.readFile(file, overwrite);
+                Optional<AudioFileRecord> recordOptional = reader.readFile(file, overwrite);
                 if (recordOptional.isPresent()) {
                     main.getRecords().add(recordOptional.get());
                     return true;
@@ -102,7 +104,7 @@ class ActionPanel extends JPanel {
                 .collect(toList());
 
         Function<AudioFileRecord, Boolean> writeLyrics = record -> {
-            tagger.writeToFile(record.getFile(), record.getLyrics());
+            writer.writeToFile(record.getFile(), record.getLyrics());
             record.setStatus(LYRICS_WRITTEN);
             return true;
         };

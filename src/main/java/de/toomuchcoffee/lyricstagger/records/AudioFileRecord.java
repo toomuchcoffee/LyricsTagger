@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.tagging;
+package de.toomuchcoffee.lyricstagger.records;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
