@@ -8,12 +8,14 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.joining;
 
 @Slf4j
 class LyricsWikiaHtmlParser {
@@ -39,7 +41,12 @@ class LyricsWikiaHtmlParser {
 
             html = html.replaceAll("\n", "@@");
             String text = Jsoup.parse(html).text();
-            String lyrics = text.replaceAll("@@", "\n").trim();
+
+            String[] parts = text.split("@@");
+            String lyrics = Arrays.stream(parts)
+                    .map(String::trim)
+                    .collect(joining("\n"))
+                    .trim();
 
             for (String licenseText : NOT_LICENSED) {
                 if (lyrics.contains(licenseText)) {
