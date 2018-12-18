@@ -60,6 +60,7 @@ class LyricsWikiaJsonParser {
     }
 
     private <T> T getJson(URL url, Class<T> clazz) throws IOException {
+        log.debug("Receiving JSON from url {}", url);
         Scanner scanner = new Scanner(url.openStream(), UTF_8.name()).useDelimiter("\\A");
         String out = scanner.next();
         scanner.close();

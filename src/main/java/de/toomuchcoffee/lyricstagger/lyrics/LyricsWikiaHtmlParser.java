@@ -25,6 +25,8 @@ class LyricsWikiaHtmlParser {
         try {
             URL url = new URL(urlString);
 
+            log.debug("Receiving XML from url {}", url);
+
             Scanner scanner = new Scanner(url.openStream(), UTF_8.name()).useDelimiter("\\A");
             String out = scanner.next();
             scanner.close();
