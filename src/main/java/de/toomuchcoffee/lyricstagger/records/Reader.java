@@ -3,17 +3,31 @@ package de.toomuchcoffee.lyricstagger.records;
 import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.SupportedFileFormat;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
+import static java.util.stream.Collectors.toSet;
 import static org.jaudiotagger.tag.FieldKey.*;
 
 @Slf4j
 public class Reader {
+
+    private static final Set<String> SUPPORTED_FILE_EXTENSIONS = Arrays.stream(SupportedFileFormat.values())
+            .map(SupportedFileFormat::getFilesuffix)
+            .collect(toSet());
+
     public Optional<AudioFileRecord> readFile(File file, boolean overwrite) {
+        String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        if (!SUPPORTED_FILE_EXTENSIONS.contains(fileExtension)) {
+            return Optional.empty();
+        }
+
         try {
             AudioFile f = AudioFileIO.read(file);
             Tag tag = f.getTag();
