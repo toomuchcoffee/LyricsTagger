@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class Finder {
@@ -17,6 +15,12 @@ public class Finder {
 
     private LyricsWikiaJsonParser jsonParser = new LyricsWikiaJsonParser();
     private LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
+
+    private Map<String, Set<String>> cache;
+
+    public void reset() {
+        cache = new HashMap<>();
+    }
 
     public Optional<String> findLyrics(String artist, String song) {
         if (song.contains("/")) {
@@ -38,7 +42,10 @@ public class Finder {
     }
 
     private Optional<String> internalFindLyrics(String artist, String song) {
-        return findMostSimilarTerm(jsonParser.findSongs(artist), song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
+        if (cache.get(artist) == null) {
+            cache.put(artist, jsonParser.findSongs(artist));
+        }
+        return findMostSimilarTerm(cache.get(artist), song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
                 .map(query -> jsonParser.findLyrics(artist, query)
                         .map(htmlParser::findLyrics)
                         .flatMap(f -> f))

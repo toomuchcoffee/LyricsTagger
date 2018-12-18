@@ -55,6 +55,11 @@ class ActionPanel extends JPanel {
 
     void next() {
         step = step.next();
+
+        if (step == FIND_LYRICS) {
+            finder.reset();
+        }
+
         checkBox.setEnabled(step == START || step == READ_FILES);
         invokeLater(() -> buttons.forEach((key, value) -> value.setEnabled(key == step)));
     }

@@ -69,7 +69,7 @@ class Table extends JTable {
                     case 5:
                         return main.getRecords().get(row).getStatus();
                     case 6:
-                        return "<html>" + main.getRecords().get(row).getLyrics() + "</html>";
+                        return "<html>" + main.getRecords().get(row).getLyrics().replaceAll("\n", "<br/>") + "</html>";
                     default:
                         return null;
                 }
