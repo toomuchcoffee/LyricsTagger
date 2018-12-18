@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
@@ -14,13 +13,13 @@ import static org.jaudiotagger.tag.FieldKey.*;
 
 @Slf4j
 public class Tagger {
-    public Optional<AudioFileRecord> readFile(File file) {
+    public Optional<AudioFileRecord> readFile(File file, boolean overwrite) {
         try {
             AudioFile f = AudioFileIO.read(file);
             Tag tag = f.getTag();
 
             String lyrics = tag.getFirst(LYRICS);
-            if (lyrics == null || lyrics.trim().length() == 0) {
+            if (overwrite || (lyrics == null || lyrics.trim().length() == 0)) {
                 return Optional.of(new AudioFileRecord(file, tag.getFirst(ARTIST), tag.getFirst(ALBUM), tag.getFirst(TITLE)));
             }
         } catch (CannotReadException e) {
@@ -31,11 +30,11 @@ public class Tagger {
         return Optional.empty();
     }
 
-    public void writeToFile(File file, FieldKey key, String value) {
+    public void writeToFile(File file, String value) {
         try {
             AudioFile f = AudioFileIO.read(file);
             Tag tag = f.getTag();
-            tag.setField(key, value);
+            tag.setField(LYRICS, value);
             f.commit();
         } catch (Exception e) {
             log.error("Failed to write to file: {}", file.getAbsolutePath(), e);

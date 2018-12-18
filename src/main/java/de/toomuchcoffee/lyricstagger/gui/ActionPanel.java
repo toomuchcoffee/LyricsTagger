@@ -12,12 +12,12 @@ import java.util.function.Function;
 
 import static de.toomuchcoffee.lyricstagger.gui.ActionPanel.Step.*;
 import static de.toomuchcoffee.lyricstagger.tagging.AudioFileRecord.Status.*;
+import static java.awt.event.ItemEvent.SELECTED;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import static javax.swing.SwingUtilities.invokeLater;
 import static org.apache.commons.io.FileUtils.listFiles;
-import static org.jaudiotagger.tag.FieldKey.LYRICS;
 
 class ActionPanel extends JPanel {
     private Main main;
@@ -31,14 +31,20 @@ class ActionPanel extends JPanel {
             FIND_LYRICS, new JButton("Find lyrics"),
             WRITE_LYRICS, new JButton("Write lyrics"));
 
+    private boolean overwrite;
+    private JCheckBox checkBox;
+
     ActionPanel(Main main) {
         super();
+
         this.main = main;
+
+        checkBox = new JCheckBox("Override existing lyrics", overwrite);
+        checkBox.addItemListener(e -> overwrite = e.getStateChange() == SELECTED);
+        add(checkBox);
+
         buttons.values().forEach(this::add);
         next();
-
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(DIRECTORIES_ONLY);
 
         buttons.get(READ_FILES).addActionListener(e -> findAudioFiles());
         buttons.get(FIND_LYRICS).addActionListener(e -> findLyrics());
@@ -47,6 +53,7 @@ class ActionPanel extends JPanel {
 
     void next() {
         step = step.next();
+        checkBox.setEnabled(step == START || step == READ_FILES);
         invokeLater(() -> buttons.forEach((key, value) -> value.setEnabled(key == step)));
     }
 
@@ -62,7 +69,7 @@ class ActionPanel extends JPanel {
             Collection<File> files = listFiles(baseDir, null, true);
 
             Function<File, Boolean> findFiles = file -> {
-                Optional<AudioFileRecord> recordOptional = tagger.readFile(file);
+                Optional<AudioFileRecord> recordOptional = tagger.readFile(file, overwrite);
                 if (recordOptional.isPresent()) {
                     main.getRecords().add(recordOptional.get());
                     return true;
@@ -95,7 +102,7 @@ class ActionPanel extends JPanel {
                 .collect(toList());
 
         Function<AudioFileRecord, Boolean> writeLyrics = record -> {
-            tagger.writeToFile(record.getFile(), LYRICS, record.getLyrics());
+            tagger.writeToFile(record.getFile(), record.getLyrics());
             record.setStatus(LYRICS_WRITTEN);
             return true;
         };
