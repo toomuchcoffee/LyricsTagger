@@ -23,6 +23,17 @@ public class LyricsWikiaFinderTest {
     }
 
     @Test
+    public void shouldNotCacheResult() {
+        Optional<String> lyrics = finder.findLyrics("Queen", "Radio Ga Ga");
+        Optional<String> lyrics2 = finder.findLyrics("Queen", "I Want To Break Free");
+        if (lyrics2.isPresent()) {
+            assertThat(lyrics2.get()).startsWith("I want to break free");
+        } else {
+            fail();
+        }
+    }
+
+    @Test
     public void identifyInstrumental() {
         Optional<String> lyrics = finder.findLyrics("Deodato", "Also Sprach Zarathustra");
         if (lyrics.isPresent()) {

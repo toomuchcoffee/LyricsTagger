@@ -36,7 +36,7 @@ public class LyricsWikiaFinder {
     private Optional<String> internalFindLyrics(String artist, String song) {
         return findMostSimilarTerm(jsonParser.findSongs(artist), song)
                 .map(query -> jsonParser.findLyrics(artist, query)
-                        .map(url -> htmlParser.findLyrics(url))
+                        .map(htmlParser::findLyrics)
                         .flatMap(f -> f))
                 .filter(Optional::isPresent)
                 .flatMap(f -> f);
