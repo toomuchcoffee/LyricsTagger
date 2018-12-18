@@ -1,15 +1,19 @@
 package de.toomuchcoffee.lyricstagger.lyrics;
 
+import com.google.common.annotations.VisibleForTesting;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Comparator.comparingInt;
-
 @Slf4j
 public class LyricsWikiaFinder {
+
+    private static final double LEVENTSHTEIN_THRESHOLD_RATIO = 0.3;
 
     private LyricsWikiaJsonParser jsonParser = new LyricsWikiaJsonParser();
     private LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
@@ -34,7 +38,7 @@ public class LyricsWikiaFinder {
     }
 
     private Optional<String> internalFindLyrics(String artist, String song) {
-        return findMostSimilarTerm(jsonParser.findSongs(artist), song)
+        return findMostSimilarTerm(jsonParser.findSongs(artist), song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
                 .map(query -> jsonParser.findLyrics(artist, query)
                         .map(htmlParser::findLyrics)
                         .flatMap(f -> f))
@@ -42,8 +46,21 @@ public class LyricsWikiaFinder {
                 .flatMap(f -> f);
     }
 
-    private Optional<String> findMostSimilarTerm(Set<String> pool, String q) {
-        return pool.stream().min(comparingInt(p -> LevenshteinDistance.getDefaultInstance().apply(p, q)));
+    @VisibleForTesting
+    Optional<String> findMostSimilarTerm(Set<String> pool, String q, int threshold) {
+        return pool.stream()
+                .map(p -> new StringWithDistance(p, LevenshteinDistance.getDefaultInstance().apply(p, q)))
+                .filter(s -> s.getDistance() <= threshold)
+                .sorted(Comparator.comparing(StringWithDistance::getDistance))
+                .map(StringWithDistance::getValue)
+                .findFirst();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    private class StringWithDistance {
+        private final String value;
+        private final int distance;
     }
 
 }

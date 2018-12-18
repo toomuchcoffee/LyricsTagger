@@ -33,7 +33,11 @@ class LyricsWikiaHtmlParser {
             Element body = doc.body();
             Elements lyricbox = body.getElementsByAttributeValue("class", "lyricbox");
 
-            String lyrics = lyricbox.text();
+            String html = lyricbox.html();
+
+            html = html.replaceAll("\n", "@@");
+            String text = Jsoup.parse(html).text();
+            String lyrics = text.replaceAll("@@", "\n").trim();
 
             for (String licenseText : NOT_LICENSED) {
                 if (lyrics.contains(licenseText)) {
@@ -41,7 +45,7 @@ class LyricsWikiaHtmlParser {
                 }
             }
 
-            return Optional.ofNullable(lyrics);
+            return Optional.of(lyrics);
         } catch (IOException e) {
             log.warn("Failed to find lyrics for url {}", urlString, e);
             return Optional.empty();
