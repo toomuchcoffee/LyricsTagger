@@ -40,7 +40,7 @@ public class CoreFacade {
         return file -> {
             Optional<AudioFileRecord> recordOptional = reader.readFile(file, findAll);
             if (recordOptional.isPresent()) {
-                getRecords().add(recordOptional.get());
+                records.add(recordOptional.get());
                 return true;
             }
             return false;

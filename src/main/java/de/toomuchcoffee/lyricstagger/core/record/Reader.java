@@ -5,6 +5,7 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.SupportedFileFormat;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.CannotReadVideoException;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.File;
@@ -36,10 +37,12 @@ public class Reader {
             if (findAll || (lyrics == null || lyrics.trim().length() == 0)) {
                 return Optional.of(new AudioFileRecord(file, tag.getFirst(ARTIST), tag.getFirst(ALBUM), tag.getFirst(TITLE)));
             }
+        } catch (CannotReadVideoException e) {
+            log.info("Skipped video file: {}", file.getAbsolutePath());
         } catch (CannotReadException e) {
-            log.warn("file is not an audio file: {}", file.getAbsolutePath(), e);
+            log.warn("File is not an audio file: {}", file.getAbsolutePath(), e);
         } catch (Exception e) {
-            log.error("failed to read file: {}", file.getAbsolutePath(), e);
+            log.error("Failed to read file: {}", file.getAbsolutePath(), e);
         }
         return Optional.empty();
     }
