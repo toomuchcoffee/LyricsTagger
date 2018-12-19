@@ -22,7 +22,7 @@ public class Reader {
             .map(SupportedFileFormat::getFilesuffix)
             .collect(toSet());
 
-    public Optional<AudioFileRecord> readFile(File file, boolean overwrite) {
+    public Optional<AudioFileRecord> readFile(File file, boolean findAll) {
         String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
         if (!SUPPORTED_FILE_EXTENSIONS.contains(fileExtension)) {
             return Optional.empty();
@@ -33,7 +33,7 @@ public class Reader {
             Tag tag = f.getTag();
 
             String lyrics = tag.getFirst(LYRICS);
-            if (overwrite || (lyrics == null || lyrics.trim().length() == 0)) {
+            if (findAll || (lyrics == null || lyrics.trim().length() == 0)) {
                 return Optional.of(new AudioFileRecord(file, tag.getFirst(ARTIST), tag.getFirst(ALBUM), tag.getFirst(TITLE)));
             }
         } catch (CannotReadException e) {
