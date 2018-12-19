@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;

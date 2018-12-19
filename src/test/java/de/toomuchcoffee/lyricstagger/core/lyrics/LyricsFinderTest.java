@@ -1,35 +1,34 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.inject.util.Modules.EMPTY_MODULE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.fail;
 
 
 public class LyricsFinderTest {
 
-    private LyricsFinder lyricsFinder = new LyricsFinder();
+    private LyricsFinder lyricsFinder;
+
+    @Before
+    public void setUp() {
+        Injector injector = Guice.createInjector(EMPTY_MODULE);
+        lyricsFinder = injector.getInstance(LyricsFinder.class);
+    }
 
     @Test
     public void happyPath() {
         Optional<String> lyrics = lyricsFinder.findLyrics("Queen", "Radio Ga Ga");
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).startsWith("I'd sit alone and watch your light");
-        } else {
-            fail();
-        }
-    }
-
-    @Test
-    public void shouldNotCacheResult() {
-        lyricsFinder.findLyrics("Queen", "Radio Ga Ga");
-        Optional<String> lyrics = lyricsFinder.findLyrics("Queen", "I Want To Break Free");
-        if (lyrics.isPresent()) {
-            assertThat(lyrics.get()).startsWith("I want to break free");
         } else {
             fail();
         }

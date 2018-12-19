@@ -1,5 +1,6 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
+import com.google.inject.Inject;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -9,9 +10,11 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import java.util.Set;
 
 class SongsFinder {
-    private LyricsWikiaJsonParser jsonParser;
+    private final LyricsWikiaJsonParser jsonParser;
+
     private Cache<String, Set> cache;
 
+    @Inject
     SongsFinder(LyricsWikiaJsonParser jsonParser) {
         this.jsonParser = jsonParser;
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();

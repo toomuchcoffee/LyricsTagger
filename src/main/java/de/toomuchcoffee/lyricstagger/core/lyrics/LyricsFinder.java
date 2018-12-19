@@ -1,6 +1,7 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,16 @@ public class LyricsFinder {
 
     private static final double LEVENTSHTEIN_THRESHOLD_RATIO = 0.3;
 
-    private LyricsWikiaJsonParser jsonParser = new LyricsWikiaJsonParser();
-    private LyricsWikiaHtmlParser htmlParser = new LyricsWikiaHtmlParser();
-    private SongsFinder songsFinder = new SongsFinder(jsonParser);
+    private final LyricsWikiaJsonParser jsonParser;
+    private final LyricsWikiaHtmlParser htmlParser;
+    private final SongsFinder songsFinder;
+
+    @Inject
+    LyricsFinder(LyricsWikiaJsonParser jsonParser, LyricsWikiaHtmlParser htmlParser, SongsFinder songsFinder) {
+        this.jsonParser = jsonParser;
+        this.htmlParser = htmlParser;
+        this.songsFinder = songsFinder;
+    }
 
     public Optional<String> findLyrics(String artist, String song) {
         if (song.contains("/")) {

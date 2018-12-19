@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.records;
+package de.toomuchcoffee.lyricstagger.core.record;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jaudiotagger.audio.AudioFile;

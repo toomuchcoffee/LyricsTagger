@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;

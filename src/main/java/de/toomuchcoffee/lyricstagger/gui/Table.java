@@ -1,6 +1,6 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
-import de.toomuchcoffee.lyricstagger.records.AudioFileRecord;
+import de.toomuchcoffee.lyricstagger.core.record.AudioFileRecord;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

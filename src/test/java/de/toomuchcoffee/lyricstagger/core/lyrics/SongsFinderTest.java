@@ -1,4 +1,4 @@
-package de.toomuchcoffee.lyricstagger.lyrics;
+package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import org.junit.Before;
 import org.junit.Test;
