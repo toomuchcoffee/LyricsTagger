@@ -20,6 +20,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 class LyricsWikiaJsonParser {
     private static final String GET_SONG = "getSong";
     private static final String GET_ARTIST = "getArtist";
+    static final String BASE_URL = "https://lyrics.fandom.com";
 
     Optional<String> findLyrics(String artist, String song) {
         try {
@@ -52,7 +53,8 @@ class LyricsWikiaJsonParser {
     }
 
     private URL buildUrl(String func, Map<String, String> params) throws URISyntaxException, MalformedURLException {
-        URIBuilder b = new URIBuilder("http://lyrics.wikia.com/api.php");
+        URIBuilder b = new URIBuilder(BASE_URL + "/api.php");
+        b.addParameter("action", "lyrics");
         b.addParameter("fmt", "json");
         b.addParameter("func", func);
         params.forEach(b::addParameter);

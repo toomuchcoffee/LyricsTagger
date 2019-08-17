@@ -14,6 +14,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static de.toomuchcoffee.lyricstagger.core.lyrics.LyricsWikiaJsonParser.BASE_URL;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 
@@ -25,7 +26,8 @@ class LyricsWikiaHtmlParser {
 
     Optional<String> findLyrics(String urlString) {
         try {
-            URL url = new URL(urlString);
+            String fixedUrl = fixedWikiaToFandomLyricsUrl(urlString);
+            URL url = new URL(fixedUrl);
 
             log.debug("Receiving XML from url {}", url);
 
@@ -59,6 +61,10 @@ class LyricsWikiaHtmlParser {
             log.warn("Failed to find lyrics for url {}", urlString, e);
             return Optional.empty();
         }
+    }
+
+    private String fixedWikiaToFandomLyricsUrl(String urlString) {
+        return urlString.replace("http://lyrics.wikia.com", BASE_URL);
     }
 
 }

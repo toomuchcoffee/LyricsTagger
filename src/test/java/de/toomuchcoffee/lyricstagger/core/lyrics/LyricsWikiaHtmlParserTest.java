@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static de.toomuchcoffee.lyricstagger.core.lyrics.LyricsWikiaJsonParser.BASE_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
@@ -15,7 +16,7 @@ public class LyricsWikiaHtmlParserTest {
     @Test
     public void findLyricsForInstrumentalShouldOnlyContainText() {
         Optional<String> lyrics = parser.findLyrics(
-                "http://lyrics.wikia.com/wiki/Rainbow:Vielleicht_Das_N%C3%A4chste_Mal_(Maybe_Next_Time)");
+                BASE_URL + "/wiki/Rainbow:Vielleicht_Das_N%C3%A4chste_Mal_(Maybe_Next_Time)");
 
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).isEqualTo("Instrumental");
@@ -27,7 +28,7 @@ public class LyricsWikiaHtmlParserTest {
     @Test
     public void findLyricsShouldOnlyContainTextWithLinebreaks() {
         Optional<String> lyrics = parser.findLyrics(
-                "http://lyrics.wikia.com/wiki/Quatermass:Post_War,_Saturday_Echo");
+                BASE_URL + "/wiki/Quatermass:Post_War,_Saturday_Echo");
 
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).isEqualTo(
