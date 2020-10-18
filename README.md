@@ -6,10 +6,23 @@ REQUIREMENTS
 ------------
 - Java 8 and up
 - Internet connection
+- API Key for Genius.com (free)
+
+CONFIGURATION
+-------------
+- Create an `application.yml` under resources
+    ```
+    genius:
+      apiClient:
+        id: your-client-id
+        secret: your-client-secret
+        accessToken: your-access-token
+    ```    
+- Fill in your personal API Keys
 
 INSTALLATION Mac OS X
 ---------------------
-- Create disk image (DMG): <code>mvn clean package appbundle:bundle</code>
+- Create disk image (DMG): `mvn clean package appbundle:bundle`
 - Open image and move app to Applications folder
 
 USAGE

@@ -1,33 +1,32 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import com.google.inject.Inject;
+import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.GeniusSearchResponse;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
 
-import java.util.Set;
-
 class SongsFinder {
-    private final LyricsWikiaJsonParser jsonParser;
+    private final GeniusClient geniusClient;
 
-    private Cache<String, Set> cache;
+    private Cache<String, GeniusSearchResponse> cache;
 
     @Inject
-    SongsFinder(LyricsWikiaJsonParser jsonParser) {
-        this.jsonParser = jsonParser;
+    SongsFinder(GeniusClient geniusClient) {
+        this.geniusClient = geniusClient;
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
         cacheManager.init();
         this.cache = cacheManager.createCache("songs", CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(String.class, Set.class, ResourcePoolsBuilder.heap(10_000)));
+                .newCacheConfigurationBuilder(String.class, GeniusSearchResponse.class, ResourcePoolsBuilder.heap(10_000)));
     }
 
     @SuppressWarnings(value = "unchecked")
-    Set<String> getSongs(String artist) {
-        if (!cache.containsKey(artist)) {
-            cache.put(artist, jsonParser.findSongs(artist));
+    GeniusSearchResponse getSongs(String query) {
+        if (!cache.containsKey(query)) {
+            cache.put(query, geniusClient.search(query));
         }
-        return cache.get(artist);
+        return cache.get(query);
     }
 }

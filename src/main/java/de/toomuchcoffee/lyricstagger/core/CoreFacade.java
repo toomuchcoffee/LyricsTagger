@@ -49,7 +49,7 @@ public class CoreFacade {
 
     public Function<AudioFileRecord, Boolean> findLyricsFunction() {
         return record -> {
-            Optional<String> lyrics = lyricsFinder.findLyrics(record.getArtist(), record.getTitle());
+            Optional<String> lyrics = lyricsFinder.findLyrics(record.getTitle(), record.getArtist());
             if (lyrics.isPresent()) {
                 record.setLyrics(lyrics.get());
                 record.setStatus(LYRICS_FOUND);

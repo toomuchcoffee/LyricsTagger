@@ -2,6 +2,7 @@ package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.Result;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,9 +27,9 @@ public class LyricsFinderTest {
 
     @Test
     public void happyPath() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("Queen", "Radio Ga Ga");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Radio Ga Ga", "Queen");
         if (lyrics.isPresent()) {
-            assertThat(lyrics.get()).startsWith("I'd sit alone and watch your light");
+            assertThat(lyrics.get()).contains("I'd sit alone and watch your light \n");
         } else {
             fail();
         }
@@ -36,54 +37,30 @@ public class LyricsFinderTest {
 
     @Test
     public void identifyInstrumental() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("Deodato", "Also Sprach Zarathustra");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Tramontane", "Foreigner");
         if (lyrics.isPresent()) {
-            assertThat(lyrics.get()).isEqualTo("Instrumental");
+            assertThat(lyrics.get()).containsIgnoringCase("Instrumental");
         } else {
             fail();
         }
     }
 
     @Test
-    public void skipUnlicensedLyricsText() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("The Beach Boys", "Roller Skating Child");
-        assertThat(lyrics).isNotPresent();
-    }
-
-    @Test
     public void dontFindLyricsForNonExistingSong() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("Foo", "Bar");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Foo", "baz");
         assertThat(lyrics).isNotPresent();
-    }
-
-    @Test
-    public void findLyricsForTitlesWhichRaiseSaxException() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("Deodato", "Also Sprach Zarathustra (2001)");
-        assertThat(lyrics).isPresent();
     }
 
     @Test
     public void findLyricsWhichShouldHaveAnAmpersand() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("Steve Vai", "Here And Now");
+        Optional<String> lyrics = lyricsFinder.findLyrics("Here And Now", "Steve Vai");
         assertThat(lyrics).isPresent();
     }
 
     @Test
     public void findLyricsWithoutExclamationMark() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("The Who", "We're Not Gonna Take It !");
+        Optional<String> lyrics = lyricsFinder.findLyrics("We're Not Gonna Take It !", "The Who");
         assertThat(lyrics).isPresent();
-    }
-
-    @Test
-    public void findLyricsForMedleys() {
-        Optional<String> lyrics = lyricsFinder.findLyrics("The Beatles", "being for the benefit of mr. kite / i want you (she's so heavy) / helter skelter");
-        if (lyrics.isPresent()) {
-            assertThat(lyrics.get()).containsIgnoringCase("The Hendersons");
-            assertThat(lyrics.get()).containsIgnoringCase("I want you so bad");
-            assertThat(lyrics.get()).containsIgnoringCase("Helter Skelter");
-        } else {
-            fail();
-        }
     }
 
     @Test
@@ -109,23 +86,24 @@ public class LyricsFinderTest {
                 "Streetwalker"
         );
 
-        Set<String> pool = newHashSet("Fever Dreams",
-                "Before The Fall",
-                "Gypsy",
-                "Breathless",
-                "Stargazer",
-                "King Of Rock 'N' Roll (Live)",
-                "Night Music",
-                "Over Love",
-                "Another Lie",
-                "Dream Evil",
-                "Walk On Water",
-                "Pain",
-                "When A Woman Cries",
-                "Black",
-                "Bring Down The Rain",
-                "Otherworld",
-                "Don't Tell The Kids");
+        Set<Result> pool = newHashSet(
+                new Result(null, "Fever Dreams", null),
+                new Result(null, "Before The Fall", null),
+                new Result(null, "Gypsy", null),
+                new Result(null, "Breathless", null),
+                new Result(null, "Stargazer", null),
+                new Result(null, "King Of Rock 'N' Roll (Live)", null),
+                new Result(null, "Night Music", null),
+                new Result(null, "Over Love", null),
+                new Result(null, "Another Lie", null),
+                new Result(null, "Dream Evil", null),
+                new Result(null, "Walk On Water", null),
+                new Result(null, "Pain", null),
+                new Result(null, "When A Woman Cries", null),
+                new Result(null, "Black", null),
+                new Result(null, "Bring Down The Rain", null),
+                new Result(null, "Otherworld", null),
+                new Result(null, "Don't Tell The Kids", null));
 
         songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song, (int) (song.length() * 0.3))
                 .ifPresent(t -> fail("No similarity wanted: " + song + ", but found: " + t)));

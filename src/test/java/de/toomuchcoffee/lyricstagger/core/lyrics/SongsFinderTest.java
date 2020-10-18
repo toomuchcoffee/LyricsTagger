@@ -1,13 +1,12 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
+import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.GeniusSearchResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,15 +15,15 @@ import static org.mockito.Mockito.when;
 public class SongsFinderTest {
 
     @Mock
-    private LyricsWikiaJsonParser jsonParser;
+    private GeniusClient geniusClient;
 
     private SongsFinder finder;
 
     @Before
     public void setUp() throws Exception {
-        finder = new SongsFinder(jsonParser);
+        finder = new SongsFinder(geniusClient);
 
-        when(jsonParser.findSongs(anyString())).thenReturn(newHashSet(randomUUID().toString()));
+        when(geniusClient.search(anyString())).thenReturn(new GeniusSearchResponse());
     }
 
     @Test
@@ -36,6 +35,6 @@ public class SongsFinderTest {
                 finder.getSongs(i + "");
             }
         }
-        verify(jsonParser).findSongs("Queen");
+        verify(geniusClient).search("Queen");
     }
 }
