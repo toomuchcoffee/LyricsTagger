@@ -1,29 +1,29 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.Result;
-import org.junit.Before;
+import de.toomuchcoffee.lyricstagger.gui.MainFrame;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.inject.util.Modules.EMPTY_MODULE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.fail;
 
-
+@SpringBootTest
+@RunWith(SpringRunner.class)
 public class LyricsFinderTest {
+    @MockBean
+    private MainFrame mainFrame;
 
+    @Autowired
     private LyricsFinder lyricsFinder;
-
-    @Before
-    public void setUp() {
-        Injector injector = Guice.createInjector(EMPTY_MODULE);
-        lyricsFinder = injector.getInstance(LyricsFinder.class);
-    }
 
     @Test
     public void happyPath() {

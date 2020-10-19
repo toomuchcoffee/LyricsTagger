@@ -1,51 +1,25 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
-import com.google.gson.annotations.SerializedName;
-import feign.Feign;
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
-import feign.gson.GsonDecoder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-import static de.toomuchcoffee.lyricstagger.core.lyrics.LyricsTaggerProperties.loadCredentials;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-@Slf4j
-class GeniusClient {
+@FeignClient(name = "genius", url = "https://api.genius.com")
+interface GeniusClient {
+    @RequestMapping(method = GET, value = "/search?q={query}")
+    GeniusSearchResponse search(@PathVariable("query") String query, @RequestHeader("Authorization") String token);
 
-    private static final String BASE_URL = "https://api.genius.com";
-    private final Genius genius;
-    private final String auth;
-
-    interface Genius {
-        @RequestLine("GET /search?q={query}")
-        @Headers("Authorization: {auth}")
-        GeniusSearchResponse search(@Param("query") String query, @Param("auth") String auth);
-
-        @RequestLine("GET /songs/{id}")
-        @Headers("Authorization: {auth}")
-        GeniusSongResponse song(@Param("id") Long id, @Param("auth") String auth);
-    }
-
-    public GeniusClient() {
-        this.genius = Feign.builder()
-                .decoder(new GsonDecoder())
-                .target(Genius.class, BASE_URL);
-        this.auth = "Bearer " + loadCredentials().getAccessToken();
-    }
-
-    public GeniusSearchResponse search(String query) {
-        return genius.search(query, auth);
-    }
-
-    public GeniusSongResponse song(Long id) {
-        return genius.song(id, auth);
-    }
+    @RequestMapping(method = GET, value = "/songs/{id}")
+    GeniusSongResponse song(@PathVariable("id") Long id,@RequestHeader("Authorization") String token);
 
     @Data
     public static class GeniusSearchResponse {
@@ -60,7 +34,7 @@ class GeniusClient {
     }
 
     @Data
-    private static class Meta {
+    public static class Meta {
         private int status;
     }
 
@@ -87,7 +61,7 @@ class GeniusClient {
     public static class Result {
         private Long id;
         private String title;
-        @SerializedName("primary_artist")
+        @JsonProperty("primary_artist")
         private Artist artist;
     }
 

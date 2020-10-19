@@ -7,12 +7,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
-class GeniusLyricsScraper {
+@Component
+public class GeniusLyricsScraper {
     Optional<String> findLyrics(String urlString) {
         try {
             Connection connection = Jsoup.connect(urlString);

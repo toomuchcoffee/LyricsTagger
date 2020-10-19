@@ -7,6 +7,7 @@ import org.jaudiotagger.audio.SupportedFileFormat;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.CannotReadVideoException;
 import org.jaudiotagger.tag.Tag;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.jaudiotagger.tag.FieldKey.*;
 
 @Slf4j
+@Component
 public class Reader {
 
     private static final Set<String> SUPPORTED_FILE_EXTENSIONS = Arrays.stream(SupportedFileFormat.values())

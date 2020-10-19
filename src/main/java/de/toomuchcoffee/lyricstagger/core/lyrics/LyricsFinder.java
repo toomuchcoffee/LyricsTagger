@@ -1,13 +1,13 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.inject.Inject;
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.GeniusSearchResponse;
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.Result;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -16,20 +16,14 @@ import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class LyricsFinder {
 
     private static final double LEVENTSHTEIN_THRESHOLD_RATIO = 0.3;
 
-    private final GeniusClient geniusClient;
-    private final GeniusLyricsScraper htmlParser;
+    private final GeniusLyricsScraper lyricsScraper;
     private final SongsFinder songsFinder;
-
-    @Inject
-    LyricsFinder(GeniusClient geniusClient, GeniusLyricsScraper htmlParser, SongsFinder songsFinder) {
-        this.geniusClient = geniusClient;
-        this.htmlParser = htmlParser;
-        this.songsFinder = songsFinder;
-    }
 
     public Optional<String> findLyrics(String song, String artist) {
         if (song.contains("/")) {
@@ -57,8 +51,8 @@ public class LyricsFinder {
                 .map(GeniusClient.Hit::getResult).collect(toSet());
 
         return findMostSimilarSongTitle(pool, song, (int) (song.length() * LEVENTSHTEIN_THRESHOLD_RATIO))
-                .map(result -> geniusClient.song(result.getId()))
-                .map(songResponse -> htmlParser.findLyrics(songResponse.getResponse().getSong().getUrl()))
+                .map(result -> songsFinder.song(result.getId()))
+                .map(songResponse -> lyricsScraper.findLyrics(songResponse.getResponse().getSong().getUrl()))
                 .filter(Optional::isPresent)
                 .flatMap(f -> f);
     }

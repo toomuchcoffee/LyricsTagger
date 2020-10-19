@@ -1,28 +1,29 @@
 package de.toomuchcoffee.lyricstagger;
 
-import com.google.inject.Injector;
-import de.toomuchcoffee.lyricstagger.gui.Main;
+import de.toomuchcoffee.lyricstagger.gui.MainFrame;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.ConfigurableApplicationContext;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.logging.LogManager;
 
-import static com.google.inject.Guice.createInjector;
-import static com.google.inject.util.Modules.EMPTY_MODULE;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
+@SpringBootApplication
+@EnableFeignClients
 public class Application {
-
     public static void main(String[] args) {
-        LogManager.getLogManager().reset();
+        ConfigurableApplicationContext applicationContext = new SpringApplicationBuilder(Application.class)
+                .headless(false).run(args);
 
-        Injector injector = createInjector(EMPTY_MODULE);
-
-        JFrame frame = injector.getInstance(Main.class);
-
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(1024, 768));
-        frame.pack();
-        frame.setVisible(true);
+        EventQueue.invokeLater(() -> {
+            MainFrame frame = applicationContext.getBean(MainFrame.class);
+            frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            frame.setPreferredSize(new Dimension(1024, 768));
+            frame.pack();
+            frame.setVisible(true);
+        });
     }
+
 }

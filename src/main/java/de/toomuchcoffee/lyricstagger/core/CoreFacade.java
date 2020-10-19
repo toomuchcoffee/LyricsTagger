@@ -1,12 +1,13 @@
 package de.toomuchcoffee.lyricstagger.core;
 
-import com.google.inject.Inject;
 import de.toomuchcoffee.lyricstagger.core.lyrics.LyricsFinder;
 import de.toomuchcoffee.lyricstagger.core.record.AudioFileRecord;
 import de.toomuchcoffee.lyricstagger.core.record.Reader;
 import de.toomuchcoffee.lyricstagger.core.record.Writer;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.function.Function;
 import static de.toomuchcoffee.lyricstagger.core.record.AudioFileRecord.Status.*;
 import static java.util.stream.Collectors.toList;
 
+@Component
+@RequiredArgsConstructor
 public class CoreFacade {
     private final Reader reader;
     private final LyricsFinder lyricsFinder;
@@ -28,13 +31,6 @@ public class CoreFacade {
     @Getter
     @Setter
     private List<AudioFileRecord> records;
-
-    @Inject
-    public CoreFacade(LyricsFinder lyricsFinder, Reader reader, Writer writer) {
-        this.lyricsFinder = lyricsFinder;
-        this.reader = reader;
-        this.writer = writer;
-    }
 
     public Function<File, Boolean> readFileFunction() {
         return file -> {

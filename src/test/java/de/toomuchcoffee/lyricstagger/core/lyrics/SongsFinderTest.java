@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,9 +22,9 @@ public class SongsFinderTest {
 
     @Before
     public void setUp() throws Exception {
-        finder = new SongsFinder(geniusClient);
+        finder = new SongsFinder(geniusClient, "foo");
 
-        when(geniusClient.search(anyString())).thenReturn(new GeniusSearchResponse());
+        when(geniusClient.search(anyString(), anyString())).thenReturn(new GeniusSearchResponse());
     }
 
     @Test
@@ -35,6 +36,6 @@ public class SongsFinderTest {
                 finder.getSongs(i + "");
             }
         }
-        verify(geniusClient).search("Queen");
+        verify(geniusClient).search(eq("Queen"), anyString());
     }
 }

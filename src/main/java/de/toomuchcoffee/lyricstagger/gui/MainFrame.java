@@ -1,10 +1,10 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 import de.toomuchcoffee.lyricstagger.core.CoreFacade;
 import de.toomuchcoffee.lyricstagger.core.record.AudioFileRecord;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -31,7 +31,8 @@ import static org.apache.commons.io.FileUtils.listFiles;
 
 
 @Slf4j
-public class Main extends JFrame {
+@org.springframework.stereotype.Component
+public class MainFrame extends JFrame {
 
     private final CoreFacade core;
 
@@ -46,8 +47,7 @@ public class Main extends JFrame {
 
     private JCheckBox checkBox;
 
-    @Inject
-    public Main(CoreFacade core) {
+    public MainFrame(@Autowired CoreFacade core) {
         super("Add lyrics to your music library");
 
         this.core = core;
