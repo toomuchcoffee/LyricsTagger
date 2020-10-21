@@ -35,4 +35,16 @@ public class GeniusLyricsScraperTest {
             fail("No lyrics found. Should have found some lyrics.");
         }
     }
+
+    @Test
+    public void findLyrics() {
+        Optional<String> lyrics = parser.findLyrics(
+                "https://genius.com/Quatermass-post-war-saturday-echo-lyrics");
+
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).contains("Freudian symbols lay my soul bare \n");
+        } else {
+            fail("No lyrics found. Should have found some lyrics.");
+        }
+    }
 }

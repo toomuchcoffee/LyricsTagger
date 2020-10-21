@@ -28,14 +28,14 @@ public class GeniusClientTest {
     @Test
     public void findLyrics() {
         System.out.println(accessToken);
-        GeniusClient.GeniusSongResponse songResponse = geniusClient.song( 309595L, "Bearer " + accessToken);
+        GeniusClient.SongResult songResponse = geniusClient.song( 309595L, "Bearer " + accessToken);
         assertThat(songResponse.getResponse().getSong().getUrl())
                 .isEqualTo("https://genius.com/Queen-radio-ga-ga-lyrics");
     }
 
     @Test
     public void findSongs() {
-        GeniusClient.GeniusSearchResponse searchResponse = geniusClient.search("ABC", "Bearer " + accessToken);
+        GeniusClient.SearchResult searchResponse = geniusClient.search("ABC", "Bearer " + accessToken);
         assertThat(searchResponse.getResponse().getHits().size()).isGreaterThan(5);
         //assertThat(searchResponse).contains("Radio Ga Ga");
     }

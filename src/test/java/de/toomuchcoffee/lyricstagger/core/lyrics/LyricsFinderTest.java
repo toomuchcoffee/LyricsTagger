@@ -64,48 +64,18 @@ public class LyricsFinderTest {
     }
 
     @Test
-    public void similarityTest() {
-        Set<String> songs = newHashSet(
-                "Carolina County Ball",
-                "L.A. 59",
-                "Ain't It All Amusing",
-                "Happy",
-                "Annie New Orleans",
-                "Rocking Chair Rock'N'Roll Blues",
-                "Rainbow",
-                "Do The Same Thing",
-                "Blanche",
-                "Trying To Burn The Sun",
-                "Black Swampy Water",
-                "Prentice Wood",
-                "When She Smiles",
-                "Good Time Music",
-                "Liberty Road",
-                "Shotgun Boogie",
-                "Wonderworld",
-                "Streetwalker"
-        );
+    public void artistSimilarityTest() {
+        boolean matches = lyricsFinder.matchArtistName("James Gang", "James Gang (band)");
+        assertThat(matches).isTrue();
+    }
 
-        Set<Result> pool = newHashSet(
-                new Result(null, "Fever Dreams", null),
-                new Result(null, "Before The Fall", null),
-                new Result(null, "Gypsy", null),
-                new Result(null, "Breathless", null),
-                new Result(null, "Stargazer", null),
-                new Result(null, "King Of Rock 'N' Roll (Live)", null),
-                new Result(null, "Night Music", null),
-                new Result(null, "Over Love", null),
-                new Result(null, "Another Lie", null),
-                new Result(null, "Dream Evil", null),
-                new Result(null, "Walk On Water", null),
-                new Result(null, "Pain", null),
-                new Result(null, "When A Woman Cries", null),
-                new Result(null, "Black", null),
-                new Result(null, "Bring Down The Rain", null),
-                new Result(null, "Otherworld", null),
-                new Result(null, "Don't Tell The Kids", null));
+    @Test
+    public void songSimilarityTest() {
+        Set<String> songs = newHashSet("Wonderworld");
 
-        songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song, (int) (song.length() * 0.3))
+        Set<Result> pool = newHashSet(new Result(null, "Otherworld", null));
+
+        songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song)
                 .ifPresent(t -> fail("No similarity wanted: " + song + ", but found: " + t)));
 
     }

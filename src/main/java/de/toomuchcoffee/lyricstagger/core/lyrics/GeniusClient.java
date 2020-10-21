@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -15,42 +16,42 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @FeignClient(name = "genius", url = "https://api.genius.com")
 interface GeniusClient {
-    @RequestMapping(method = GET, value = "/search?q={query}")
-    GeniusSearchResponse search(@PathVariable("query") String query, @RequestHeader("Authorization") String token);
+    @RequestMapping(method = GET, value = "/search")
+    SearchResult search(@RequestParam("q") String query, @RequestHeader("Authorization") String token);
 
     @RequestMapping(method = GET, value = "/songs/{id}")
-    GeniusSongResponse song(@PathVariable("id") Long id,@RequestHeader("Authorization") String token);
+    SongResult song(@PathVariable("id") Long id, @RequestHeader("Authorization") String token);
 
     @Data
-    public static class GeniusSearchResponse {
+    class SearchResult {
         private Meta meta;
         private SearchResponse response;
     }
 
     @Data
-    public static class GeniusSongResponse {
+    class SongResult {
         private Meta meta;
         private SongResponse response;
     }
 
     @Data
-    public static class Meta {
+    class Meta {
         private int status;
     }
 
     @Data
-    public static class SearchResponse {
+    class SearchResponse {
         private int status;
         private List<Hit> hits;
     }
 
     @Data
-    public static class SongResponse {
+    class SongResponse {
         private Song song;
     }
 
     @Data
-    public static class Hit {
+    class Hit {
         private String type;
         private Result result;
     }
@@ -58,7 +59,7 @@ interface GeniusClient {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Result {
+    class Result {
         private Long id;
         private String title;
         @JsonProperty("primary_artist")
@@ -66,14 +67,14 @@ interface GeniusClient {
     }
 
     @Data
-    public static class Song {
+    class Song {
         private Long id;
         private String title;
         private String url;
     }
 
     @Data
-    public static class Artist {
+    class Artist {
         private Long id;
         private String name;
     }
