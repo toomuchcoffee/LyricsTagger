@@ -1,19 +1,20 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Fail.fail;
 
 
-public class GeniusLyricsScraperTest {
+class GeniusLyricsScraperTest {
 
     private final GeniusLyricsScraper parser = new GeniusLyricsScraper();
 
     @Test
-    public void findLyricsForInstrumentalShouldOnlyContainText() {
+    void findLyricsForInstrumentalShouldOnlyContainText() {
         Optional<String> lyrics = parser.findLyrics(
                 "https://genius.com/Rainbow-vielleicht-das-nachste-mal-lyrics");
 
@@ -25,7 +26,7 @@ public class GeniusLyricsScraperTest {
     }
 
     @Test
-    public void findLyricsShouldOnlyContainTextWithLinebreaks() {
+    void findLyricsShouldOnlyContainTextWithLinebreaks() {
         Optional<String> lyrics = parser.findLyrics(
                 "https://genius.com/Quatermass-post-war-saturday-echo-lyrics");
 
@@ -37,7 +38,7 @@ public class GeniusLyricsScraperTest {
     }
 
     @Test
-    public void findLyrics() {
+    void findLyrics() {
         Optional<String> lyrics = parser.findLyrics(
                 "https://genius.com/Quatermass-post-war-saturday-echo-lyrics");
 
