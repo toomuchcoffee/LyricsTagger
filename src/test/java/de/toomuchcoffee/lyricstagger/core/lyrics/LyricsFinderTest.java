@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.fail;
 
@@ -71,9 +70,9 @@ public class LyricsFinderTest {
 
     @Test
     public void songSimilarityTest() {
-        Set<String> songs = newHashSet("Wonderworld");
+        Set<String> songs = Set.of("Wonderworld");
 
-        Set<Result> pool = newHashSet(new Result(null, "Otherworld", null));
+        Set<Result> pool = Set.of(new Result(null, "Otherworld", null));
 
         songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song)
                 .ifPresent(t -> fail("No similarity wanted: " + song + ", but found: " + t)));

@@ -26,17 +26,9 @@ public class GeniusLyricsScraper {
             doc.select("p").prepend("\\n\\n");
 
             Element body = doc.body();
+            Elements lyricbox = body.getElementsByAttributeValueStarting("class", "lyrics");
 
-            String html;
-            Elements lyricsContainer = body.getElementsByAttributeValueStarting("class", "Lyrics__Container");
-            Elements lyricsMessage = body.getElementsByAttributeValueStarting("class", "LyricsPlaceholder__Message");
-            if (!lyricsContainer.isEmpty()) {
-                html = lyricsContainer.html();
-            } else if (!lyricsMessage.isEmpty()) {
-                html = lyricsMessage.html();
-            } else {
-                return Optional.empty();
-            }
+            String html = lyricbox.html();
 
             String text = Jsoup.parse(html).text();
             String s = text.replaceAll("\\\\n", "\n");

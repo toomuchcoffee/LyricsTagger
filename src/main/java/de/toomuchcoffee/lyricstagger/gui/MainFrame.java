@@ -1,6 +1,5 @@
 package de.toomuchcoffee.lyricstagger.gui;
 
-import com.google.common.collect.ImmutableMap;
 import de.toomuchcoffee.lyricstagger.core.CoreFacade;
 import de.toomuchcoffee.lyricstagger.core.record.AudioFileRecord;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +43,12 @@ public class MainFrame extends JFrame {
 
     private Step step = START;
 
-    private Map<Step, JButton> buttons = ImmutableMap.of(
+    private final Map<Step, JButton> buttons = Map.of(
             READ_FILES, new JButton("Add music library path"),
             FIND_LYRICS, new JButton("Find lyrics"),
             WRITE_LYRICS, new JButton("Write lyrics"));
 
-    private JCheckBox checkBox;
+    private final JCheckBox checkBox;
 
     public MainFrame(@Autowired CoreFacade core) {
         super("Add lyrics to your music library");
@@ -205,7 +204,7 @@ public class MainFrame extends JFrame {
             });
 
             setModel(new DefaultTableModel() {
-                private String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "File"};
+                private final String[] columns = new String[]{"Nr", "Artist", "Album", "Title", "File"};
 
                 public int getColumnCount() {
                     return columns.length;

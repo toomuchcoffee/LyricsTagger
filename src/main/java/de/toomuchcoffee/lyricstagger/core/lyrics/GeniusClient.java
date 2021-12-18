@@ -5,21 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
 @FeignClient(name = "genius", url = "https://api.genius.com")
 interface GeniusClient {
-    @RequestMapping(method = GET, value = "/search")
+    @GetMapping(value = "/search", consumes = "application/json")
     SearchResult search(@RequestParam("q") String query, @RequestHeader("Authorization") String token);
 
-    @RequestMapping(method = GET, value = "/songs/{id}")
+    @GetMapping(value = "/songs/{id}", consumes = "application/json")
     SongResult song(@PathVariable("id") Long id, @RequestHeader("Authorization") String token);
 
     @Data

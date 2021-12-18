@@ -11,13 +11,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.2.10.RELEASE</version>
+        <version>2.6.1</version>
         <relativePath/>
     </parent>
 
     <properties>
         <java.version>11</java.version>
-        <spring-cloud.version>Hoxton.SR8</spring-cloud.version>
+        <spring-cloud.version>2021.0.0</spring-cloud.version>
         <start-class>de.toomuchcoffee.lyricstagger.Application</start-class>
     </properties>
 
@@ -50,19 +50,14 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.jthink</groupId>
-            <artifactId>jaudiotagger</artifactId>
-            <version>3.0.1</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.9</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -70,9 +65,14 @@
             <version>1.14.3</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>2.13.0</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jthink</groupId>
+            <artifactId>jaudiotagger</artifactId>
+            <version>3.0.1</version>
         </dependency>
 
         <dependency>

@@ -1,6 +1,5 @@
 package de.toomuchcoffee.lyricstagger.core.lyrics;
 
-import com.google.common.annotations.VisibleForTesting;
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.Result;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -60,13 +59,11 @@ public class LyricsFinder {
                 .flatMap(lyricsScraper::findLyrics);
     }
 
-    @VisibleForTesting
     public boolean matchArtistName(String artist, String hit) {
         Integer distance = LevenshteinDistance.getDefaultInstance().apply(hit, artist);
         return distance <= calculateThreshold(artist, hit, LEVENTSHTEIN_ARTIST_THRESHOLD_RATIO);
     }
 
-    @VisibleForTesting
     Optional<Result> findMostSimilarSongTitle(Set<Result> pool, String q) {
         return pool.stream()
                 .map(p -> new ResultWithDistance(p, LevenshteinDistance.getDefaultInstance().apply(p.getTitle(), q)))

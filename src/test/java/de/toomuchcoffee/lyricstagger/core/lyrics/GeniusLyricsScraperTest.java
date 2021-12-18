@@ -48,15 +48,4 @@ public class GeniusLyricsScraperTest {
         }
     }
 
-    @Test
-    public void findLyricsSkipsCrap() {
-        Optional<String> lyrics = parser.findLyrics(
-                "https://genius.com/tananas-inkweru-lyrics");
-
-        if (lyrics.isPresent()) {
-            assertThat(lyrics.get()).contains("This song is an instrumental");
-        } else {
-            fail("No lyrics found. Should have found some lyrics.");
-        }
-    }
 }
