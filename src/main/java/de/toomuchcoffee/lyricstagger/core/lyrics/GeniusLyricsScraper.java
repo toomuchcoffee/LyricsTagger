@@ -20,15 +20,23 @@ public class GeniusLyricsScraper {
             Connection connection = Jsoup.connect(urlString);
             connection.userAgent("Mozilla");
             Document doc = connection.get();
-            
+
             doc.outputSettings(new Document.OutputSettings().prettyPrint(false));//makes html() preserve linebreaks and spacing
             doc.select("br").append("\\n");
             doc.select("p").prepend("\\n\\n");
 
             Element body = doc.body();
-            Elements lyricbox = body.getElementsByAttributeValueStarting("class", "lyrics");
 
-            String html = lyricbox.html();
+            String html;
+            Elements lyricsContainer = body.getElementsByAttributeValueStarting("class", "Lyrics__Container");
+            Elements lyricsMessage = body.getElementsByAttributeValueStarting("class", "LyricsPlaceholder__Message");
+            if (!lyricsContainer.isEmpty()) {
+                html = lyricsContainer.html();
+            } else if (!lyricsMessage.isEmpty()) {
+                html = lyricsMessage.html();
+            } else {
+                return Optional.empty();
+            }
 
             String text = Jsoup.parse(html).text();
             String s = text.replaceAll("\\\\n", "\n");

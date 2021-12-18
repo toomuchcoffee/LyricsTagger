@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 
 public class GeniusLyricsScraperTest {
 
-    private GeniusLyricsScraper parser = new GeniusLyricsScraper();
+    private final GeniusLyricsScraper parser = new GeniusLyricsScraper();
 
     @Test
     public void findLyricsForInstrumentalShouldOnlyContainText() {
@@ -43,6 +43,18 @@ public class GeniusLyricsScraperTest {
 
         if (lyrics.isPresent()) {
             assertThat(lyrics.get()).contains("Freudian symbols lay my soul bare \n");
+        } else {
+            fail("No lyrics found. Should have found some lyrics.");
+        }
+    }
+
+    @Test
+    public void findLyricsSkipsCrap() {
+        Optional<String> lyrics = parser.findLyrics(
+                "https://genius.com/tananas-inkweru-lyrics");
+
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).contains("This song is an instrumental");
         } else {
             fail("No lyrics found. Should have found some lyrics.");
         }
