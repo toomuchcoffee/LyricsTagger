@@ -11,11 +11,16 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static de.toomuchcoffee.lyricstagger.gui.Step.*;
 import static java.awt.BorderLayout.CENTER;
@@ -27,7 +32,6 @@ import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static javax.swing.SwingUtilities.invokeLater;
-import static org.apache.commons.io.FileUtils.listFiles;
 
 
 @Slf4j
@@ -83,9 +87,18 @@ public class MainFrame extends JFrame {
 
         if (returnVal == APPROVE_OPTION) {
             File baseDir = fileChooser.getSelectedFile();
-            Collection<File> files = listFiles(baseDir, null, true);
+
+            try {
+                Collection<File> files = Files.walk(Paths.get(baseDir.toURI()), 99)
+                        .filter(file -> !Files.isDirectory(file))
+                        .map(Path::toFile)
+                        .collect(Collectors.toSet());
 
             process(files, core.readFileFunction(), "%d audio files have been added!");
+            } catch (IOException e) {
+                log.error("Failed to walk through files in directory: {}", baseDir.getAbsolutePath());
+            }
+
         }
     }
 

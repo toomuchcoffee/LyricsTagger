@@ -13,8 +13,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.Math.max;
 import static java.util.stream.Collectors.toSet;
-import static jdk.nashorn.internal.objects.NativeMath.max;
 
 @Slf4j
 @Component
@@ -33,7 +33,7 @@ public class LyricsFinder {
             StringBuilder sb = new StringBuilder();
             for (String part : parts) {
                 Optional<String> lyrics = internalFindLyrics(part, artist);
-                if (!lyrics.isPresent()) {
+                if (lyrics.isEmpty()) {
                     return Optional.empty();
                 }
                 sb.append("\n\n\n");
@@ -48,8 +48,8 @@ public class LyricsFinder {
 
     private Optional<String> internalFindLyrics(String song, String artist) {
         Set<Result> pool = songFinder.search(artist + " " + song).map(result -> result.getResponse().getHits().stream()
-                .filter(hit -> matchArtistName(artist, hit.getResult().getArtist().getName()))
-                .map(GeniusClient.Hit::getResult).collect(toSet()))
+                .map(GeniusClient.Hit::getResult)
+                .filter(hitResult -> matchArtistName(artist, hitResult.getArtist().getName())).collect(toSet()))
                 .orElse(new HashSet<>());
 
         return findMostSimilarSongTitle(pool, song)
