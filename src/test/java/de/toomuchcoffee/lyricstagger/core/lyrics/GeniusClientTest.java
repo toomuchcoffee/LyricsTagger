@@ -22,9 +22,6 @@ class GeniusClientTest {
     @Autowired
     private GeniusClient geniusClient;
 
-    @MockBean
-    private CrapStripper crapStripper;
-
     @Test
     void findLyrics() {
         System.out.println(accessToken);

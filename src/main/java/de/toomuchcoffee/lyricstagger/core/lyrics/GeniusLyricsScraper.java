@@ -28,9 +28,12 @@ public class GeniusLyricsScraper {
             Element body = doc.body();
             Elements lyricbox = body.getElementsByAttributeValueStarting("class", "lyrics");
 
-            String html = lyricbox.html();
+            Elements message = lyricbox.select("div[data-lyrics-container=true]");
+            if (message.isEmpty()) {
+                message = lyricbox.select("div[class*=Message]");
+            }
 
-            String text = Jsoup.parse(html).text();
+            String text = Jsoup.parse(message.html()).text();
             String s = text.replaceAll("\\\\n", "\n");
 
             String clean = Jsoup.clean(s, "", Safelist.none(), new Document.OutputSettings().prettyPrint(false));
