@@ -2,7 +2,9 @@ package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.Result;
 import de.toomuchcoffee.lyricstagger.gui.MainFrame;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,8 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.toomuchcoffee.lyricstagger.core.lyrics.CrapStripper.CRAP_STRING;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class LyricsFinderTest {
@@ -20,6 +26,14 @@ class LyricsFinderTest {
 
     @Autowired
     private LyricsFinder lyricsFinder;
+
+    @MockBean
+    private CrapStripper crapStripper;
+
+    @BeforeEach
+    void setUp() {
+        when(crapStripper.stripFromCrap(anyString())).thenCallRealMethod();
+    }
 
     @Test
     void happyPath() {
@@ -42,7 +56,7 @@ class LyricsFinderTest {
     }
 
     @Test
-    void dontFindLyricsForNonExistingSong() {
+    void doNotFindLyricsForNonExistingSong() {
         Optional<String> lyrics = lyricsFinder.findLyrics("Foo", "baz");
         assertThat(lyrics).isNotPresent();
     }
@@ -74,5 +88,14 @@ class LyricsFinderTest {
         songs.forEach(song -> lyricsFinder.findMostSimilarSongTitle(pool, song)
                 .ifPresent(t -> fail("No similarity wanted: " + song + ", but found: " + t)));
 
+    }
+
+    @Test
+    void usesCrapStripper() {
+        lyricsFinder.findLyrics("Post War Saturday Echo", "Quatermass");
+
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(crapStripper).stripFromCrap(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue()).contains(CRAP_STRING);
     }
 }

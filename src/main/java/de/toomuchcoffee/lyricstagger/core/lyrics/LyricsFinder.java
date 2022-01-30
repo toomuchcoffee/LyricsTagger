@@ -25,6 +25,7 @@ public class LyricsFinder {
 
     private final GeniusLyricsScraper lyricsScraper;
     private final SongFinder songFinder;
+    private final CrapStripper crapStripper;
 
     public Optional<String> findLyrics(String song, String artist) {
         if (song.contains("/")) {
@@ -56,7 +57,8 @@ public class LyricsFinder {
                         .map(r -> r.getResponse().getSong().getUrl()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .flatMap(lyricsScraper::findLyrics);
+                .flatMap(lyricsScraper::findLyrics)
+                .map(crapStripper::stripFromCrap);
     }
 
     public boolean matchArtistName(String artist, String hit) {
