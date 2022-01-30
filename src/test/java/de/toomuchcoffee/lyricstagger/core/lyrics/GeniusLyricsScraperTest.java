@@ -49,4 +49,16 @@ class GeniusLyricsScraperTest {
         }
     }
 
+    @Test
+    void findCrap() {
+        Optional<String> lyrics = parser.findLyrics(
+                "https://genius.com/Quatermass-post-war-saturday-echo-lyrics");
+
+        if (lyrics.isPresent()) {
+            assertThat(lyrics.get()).contains("Embed Cancel How to Format Lyrics: ");
+        } else {
+            fail("No lyrics found. Should have found some lyrics.");
+        }
+    }
+
 }

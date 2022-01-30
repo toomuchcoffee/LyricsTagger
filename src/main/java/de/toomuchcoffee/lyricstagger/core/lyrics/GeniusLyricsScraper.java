@@ -5,7 +5,7 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +33,9 @@ public class GeniusLyricsScraper {
             String text = Jsoup.parse(html).text();
             String s = text.replaceAll("\\\\n", "\n");
 
-            String clean = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+            String clean = Jsoup.clean(s, "", Safelist.none(), new Document.OutputSettings().prettyPrint(false));
 
-            return Optional.of(clean.trim());
+            return Optional.of((clean.trim()));
         } catch (IOException e) {
             log.warn("Failed to find lyrics for url {}", urlString, e);
             return Optional.empty();
