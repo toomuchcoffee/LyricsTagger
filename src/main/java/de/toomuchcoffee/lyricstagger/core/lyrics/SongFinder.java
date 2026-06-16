@@ -2,11 +2,11 @@ package de.toomuchcoffee.lyricstagger.core.lyrics;
 
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.SearchResult;
 import de.toomuchcoffee.lyricstagger.core.lyrics.GeniusClient.SongResult;
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Optional;
 
@@ -27,7 +27,7 @@ public class SongFinder {
         try {
             SearchResult searchResult = geniusClient.search(query, getAuthorization());
             return Optional.of(searchResult);
-        } catch (FeignException e) {
+        } catch (RestClientResponseException e) {
             log.error("Failed to execute search by: {}", query, e);
             return Optional.empty();
         }
@@ -39,7 +39,7 @@ public class SongFinder {
         try {
             SongResult songResult = geniusClient.song(id, getAuthorization());
             return Optional.of(songResult);
-        } catch (FeignException e) {
+        } catch (RestClientResponseException e) {
             log.error("Failed to retrieve song with id: {}", id, e);
             return Optional.empty();
         }

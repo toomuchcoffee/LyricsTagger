@@ -4,20 +4,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
 
 import java.util.List;
 
-@FeignClient(name = "genius", url = "https://api.genius.com")
-interface GeniusClient {
-    @GetMapping(value = "/search", consumes = "application/json")
+public interface GeniusClient {
+    @GetExchange(value = "/search")
     SearchResult search(@RequestParam("q") String query, @RequestHeader("Authorization") String token);
 
-    @GetMapping(value = "/songs/{id}", consumes = "application/json")
+    @GetExchange(value = "/songs/{id}")
     SongResult song(@PathVariable("id") Long id, @RequestHeader("Authorization") String token);
 
     @Data

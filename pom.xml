@@ -11,22 +11,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.1</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <java.version>11</java.version>
-        <spring-cloud.version>2021.0.0</spring-cloud.version>
+        <java.version>21</java.version>
+        <spring-cloud.version>2025.1.0</spring-cloud.version>
         <start-class>de.toomuchcoffee.lyricstagger.Application</start-class>
+        <jsoup.version>1.18.3</jsoup.version>
+        <commons-text.version>1.13.0</commons-text.version>
+        <jaudiotagger.version>3.0.1</jaudiotagger.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jaudiotagger-repository</id>
-            <url>https://dl.bintray.com/ijabz/maven</url>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -41,47 +37,55 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Core Spring Boot & Cloud -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <!-- Jackson (Versions managed automatically by Spring Boot Parent) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.13.0</version>
         </dependency>
+
+        <!-- Utilities & Audio Tagging (Safe versions synced with Central) -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.14.3</version>
+            <version>${jsoup.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.9</version>
+            <version>${commons-text.version}</version>
         </dependency>
         <dependency>
             <groupId>net.jthink</groupId>
             <artifactId>jaudiotagger</artifactId>
-            <version>3.0.1</version>
+            <version>${jaudiotagger.version}</version>
         </dependency>
 
+        <!-- Boilerplate Reduction (Version managed by Boot Parent) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
 
+        <!-- Testing Infrastructure (Versions managed by Boot Parent) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -90,19 +94,16 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.21.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
